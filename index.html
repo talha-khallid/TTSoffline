@@ -3,613 +3,613 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Kitten TTS · Nano — On-Device Speech Synthesis</title>
-<meta name="description" content="A 15M-parameter, INT8-quantized text-to-speech model running entirely in your browser. No server, no API keys, no data leaving your machine." />
+<title>Kitten TTS · Studio Dashboard</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
-  :root{
-    --bg: #0a0d11;
-    --bg-grid: #0d1116;
-    --panel: #12161d;
-    --panel-raised: #1a212b;
-    --panel-raised-2: #212936;
-    --border: #242c38;
-    --border-soft: #1b222c;
-    --text: #edeff3;
-    --text-muted: #8b93a3;
-    --text-faint: #545c6b;
-    --amber: #f2a93c;
-    --amber-dim: #8a6323;
-    --amber-glow: rgba(242,169,60,0.35);
-    --cyan: #56d2c8;
-    --cyan-dim: #2c5450;
-    --red: #e8604c;
-    --red-dim: #402420;
-    --green: #6fd08c;
-    --font-display: 'Space Grotesk', sans-serif;
-    --font-body: 'Inter', sans-serif;
+  :root {
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --border-light: #f1f5f9;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --text-faint: #94a3b8;
+    --accent: #0f172a;
+    --accent-hover: #1e293b;
+    --brand-orange: #f2a93c;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --radius: 16px;
+    --radius-sm: 8px;
+    --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
-    --radius: 10px;
-    --radius-sm: 6px;
   }
 
-  *{ box-sizing: border-box; }
-  html{ color-scheme: dark; }
-  body{
-    margin: 0;
-    background:
-      radial-gradient(1200px 600px at 50% -10%, rgba(242,169,60,0.06), transparent 60%),
-      radial-gradient(900px 500px at 90% 10%, rgba(86,210,200,0.05), transparent 55%),
-      var(--bg);
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--bg);
     color: var(--text);
-    font-family: var(--font-body);
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
+    font-family: var(--font);
     min-height: 100vh;
+    padding: 32px 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    -webkit-font-smoothing: antialiased;
   }
 
-  ::selection{ background: var(--amber-glow); color: var(--text); }
-
-  a{ color: var(--cyan); }
-
-  button, input, select, textarea{ font-family: inherit; }
-
-  /* focus visibility */
-  :focus-visible{
-    outline: 2px solid var(--amber);
-    outline-offset: 2px;
-    border-radius: 4px;
+  /* Equal-Height Grid Shell */
+  .container {
+    width: 100%;
+    max-width: 1160px;
+    display: grid;
+    grid-template-columns: 1.08fr 0.92fr;
+    gap: 20px;
+    align-items: stretch;
   }
 
-  .wrap{
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 48px 20px 80px;
+  /* Base Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
   }
 
-  /* ---------- Header ---------- */
-  header.app-header{
-    margin-bottom: 40px;
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
   }
-  .eyebrow{
+
+  .card-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  /* --- Left Column Layout --- */
+  .left-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* 1. Identity Card */
+  .identity-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  }
+
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-logo-wrap {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: #111317;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  }
+
+  .brand-logo-wrap svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .brand-meta h1 {
+    font-size: 14.5px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text);
+  }
+
+  .brand-meta p {
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+
+  .stats-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stat-pill {
+    font-size: 11px;
+    font-weight: 600;
     font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--amber);
+    color: var(--text-muted);
+    background: var(--border-light);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  /* 2. Model Cache Card */
+  .model-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  }
+
+  .model-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .model-info-title {
+    font-size: 13.5px;
+    font-weight: 700;
+  }
+
+  .model-info-sub {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    margin-top: 1px;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--border-light);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--amber);
+  }
+  .dot.ready { background: var(--green); }
+  .dot.busy { background: var(--amber); animation: pulse 1.2s infinite ease-in-out; }
+  .dot.error { background: var(--red); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .download-progress {
+    margin-top: 12px;
+    display: none;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+
+  .progress-bar-bg {
+    height: 5px;
+    background: var(--border-light);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.15s ease;
+  }
+
+  .model-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .model-size-label {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .btn-delete-cache {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid #fee2e2;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-delete-cache:hover {
+    background: #fef2f2;
+    border-color: #fca5a5;
+  }
+
+  /* 3. Synthesizer Card */
+  .synth-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .field-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .counter {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+  }
+
+  textarea.input-text {
+    width: 100%;
+    height: 110px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  textarea.input-text:focus { border-color: var(--text); }
+
+  .controls-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  select.input-select {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+  }
+  select.input-select:focus { border-color: var(--text); }
+
+  .slider-container {
+    display: flex;
+    align-items: center;
+    height: 38px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 5px;
+    background: var(--border);
+    border-radius: 100px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  .btn-generate {
+    width: 100%;
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-generate:hover:not(:disabled) { background: var(--accent-hover); }
+  .btn-generate:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .audio-output {
+    padding-top: 12px;
+    border-top: 1px solid var(--border-light);
+    display: none;
+  }
+  .audio-output.show { display: block; }
+  .audio-output audio { width: 100%; height: 34px; }
+
+  /* --- Right Column Layout: History --- */
+  .history-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .history-header-info {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 14px;
-  }
-  .eyebrow .dot{
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 0 3px rgba(111,208,140,0.15);
-  }
-  .eyebrow .dot.offline{ background: var(--text-faint); box-shadow: none; }
-  .eyebrow .dot.busy{ background: var(--amber); box-shadow: 0 0 0 3px var(--amber-glow); animation: pulse-dot 1.1s ease-in-out infinite; }
-  .eyebrow .dot.error{ background: var(--red); box-shadow: 0 0 0 3px rgba(232,96,76,0.18); }
-  @keyframes pulse-dot{ 0%,100%{ opacity: 1; } 50%{ opacity: 0.35; } }
-
-  h1.title{
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: clamp(30px, 5vw, 42px);
-    letter-spacing: -0.01em;
-    margin: 0 0 10px;
-  }
-  h1.title .accent{ color: var(--amber); }
-
-  p.subtitle{
-    color: var(--text-muted);
-    font-size: 15.5px;
-    max-width: 60ch;
-    margin: 0;
-  }
-  p.subtitle code{
-    font-family: var(--font-mono);
-    background: var(--panel-raised);
-    border: 1px solid var(--border);
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 0.9em;
-    color: var(--cyan);
   }
 
-  /* ---------- Signal path (signature element) ---------- */
-  .signal-path{
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0;
-    margin: 28px 0 0;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-  .signal-stage{
-    position: relative;
-    padding: 16px 16px 14px;
-    border-right: 1px solid var(--border);
-    transition: background 0.35s ease;
-  }
-  .signal-stage:last-child{ border-right: none; }
-  .signal-stage .num{
-    font-family: var(--font-mono);
+  .pill-count {
     font-size: 11px;
-    color: var(--text-faint);
-    letter-spacing: 0.05em;
-  }
-  .signal-stage .label{
-    font-family: var(--font-display);
     font-weight: 600;
-    font-size: 14px;
-    margin-top: 4px;
     color: var(--text-muted);
-    transition: color 0.35s ease;
-  }
-  .signal-stage.active{ background: linear-gradient(180deg, rgba(242,169,60,0.10), transparent); }
-  .signal-stage.active .label{ color: var(--amber); }
-  .signal-stage.active .num{ color: var(--amber-dim); }
-  .signal-stage.done .label{ color: var(--text); }
-  .signal-stage.done::after{
-    content: "";
-    position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
-    background: var(--cyan);
-  }
-  .signal-stage.active::after{
-    content: "";
-    position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
-    background: var(--amber);
-    animation: sweep 1.4s ease-in-out infinite;
-  }
-  @keyframes sweep{ 0%{ opacity: 0.3; } 50%{ opacity: 1; } 100%{ opacity: 0.3; } }
-
-  /* ---------- Panels ---------- */
-  .panel{
-    background: var(--panel);
+    background: var(--border-light);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 22px;
-    margin-top: 20px;
+    padding: 2px 8px;
+    border-radius: 100px;
   }
-  .panel h2{
-    font-family: var(--font-display);
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+
+  .btn-clear-history {
+    background: transparent;
+    border: none;
+    font-size: 11.5px;
+    font-weight: 600;
     color: var(--text-muted);
-    margin: 0 0 16px;
+    cursor: pointer;
+    transition: color 0.15s ease;
+  }
+  .btn-clear-history:hover { color: var(--red); }
+
+  .history-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .panel h2 .badge{
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0;
-    text-transform: none;
-    padding: 3px 9px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-  }
-  .badge.cached{ color: var(--green); border-color: rgba(111,208,140,0.3); background: rgba(111,208,140,0.06); }
-  .badge.not-cached{ color: var(--text-faint); }
-  .badge.downloading{ color: var(--amber); border-color: rgba(242,169,60,0.3); background: rgba(242,169,60,0.06); }
-  .badge.error{ color: var(--red); border-color: rgba(232,96,76,0.35); background: rgba(232,96,76,0.06); }
-
-  /* ---------- Model / download panel ---------- */
-  .model-meta{
-    display: flex; flex-wrap: wrap; gap: 8px 20px;
-    font-family: var(--font-mono);
-    font-size: 12.5px;
-    color: var(--text-muted);
-    margin-bottom: 14px;
-  }
-  .model-meta a{ color: var(--text-muted); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px; }
-  .model-meta a:hover{ color: var(--cyan); text-decoration-color: var(--cyan); }
-
-  .progress-row{ margin-top: 10px; }
-  .progress-status{
-    font-family: var(--font-mono);
-    font-size: 12.5px;
-    color: var(--text-muted);
-    display: flex; justify-content: space-between; gap: 12px;
-    margin-bottom: 8px;
-  }
-  .progress-status .pct{ color: var(--amber); }
-  .progress-track{
-    height: 8px;
-    background: var(--panel-raised);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    overflow: hidden;
-    position: relative;
-  }
-  .progress-fill{
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, var(--amber-dim), var(--amber));
-    border-radius: 100px;
-    transition: width 0.25s ease;
-  }
-  .progress-fill.indeterminate{
-    width: 30% !important;
-    animation: indet 1.2s ease-in-out infinite;
-  }
-  @keyframes indet{
-    0%{ transform: translateX(-100%); }
-    100%{ transform: translateX(430%); }
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 4px;
   }
 
-  .cache-actions{
-    display: flex; align-items: center; gap: 10px;
-    margin-top: 16px;
-  }
-
-  /* ---------- Buttons ---------- */
-  .btn{
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 13.5px;
-    padding: 10px 18px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    background: var(--panel-raised);
-    color: var(--text);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    display: inline-flex; align-items: center; gap: 8px;
-  }
-  .btn:hover:not(:disabled){ background: var(--panel-raised-2); border-color: #33404f; }
-  .btn:active:not(:disabled){ transform: translateY(1px); }
-  .btn:disabled{ opacity: 0.4; cursor: not-allowed; }
-  .btn.primary{
-    background: var(--amber);
-    border-color: var(--amber);
-    color: #1a1204;
-  }
-  .btn.primary:hover:not(:disabled){ background: #ffb84f; border-color: #ffb84f; }
-  .btn.ghost{ background: transparent; }
-  .btn.danger{ color: var(--red); }
-  .btn.danger:hover:not(:disabled){ background: var(--red-dim); border-color: rgba(232,96,76,0.4); }
-  .btn.small{ padding: 7px 12px; font-size: 12.5px; }
-  .btn svg{ width: 15px; height: 15px; flex-shrink: 0; }
-
-  .btn.primary.busy{
-    background: var(--amber-dim);
-    border-color: var(--amber-dim);
-    color: rgba(255,255,255,0.7);
-  }
-  .spinner{
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.35);
-    border-top-color: rgba(255,255,255,0.95);
-    animation: spin 0.7s linear infinite;
-    flex-shrink: 0;
-  }
-  @keyframes spin{ to{ transform: rotate(360deg); } }
-
-  /* ---------- Synthesis panel ---------- */
-  .field{ margin-bottom: 18px; }
-  .field:last-child{ margin-bottom: 0; }
-  .field-label{
-    display: flex; justify-content: space-between; align-items: baseline;
-    font-size: 12.5px;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-    font-family: var(--font-mono);
-  }
-  .field-label .count{ color: var(--text-faint); }
-  .field-label .count.limit{ color: var(--red); }
-
-  textarea#text-input{
-    width: 100%;
-    min-height: 120px;
-    resize: vertical;
-    background: var(--panel-raised);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: 15px;
-    padding: 14px;
-    line-height: 1.55;
-  }
-  textarea#text-input::placeholder{ color: var(--text-faint); }
-
-  .try-example{
-    background: none; border: none; color: var(--cyan);
-    font-family: var(--font-mono); font-size: 12px;
-    cursor: pointer; padding: 0; text-decoration: underline;
-    text-underline-offset: 3px; text-decoration-color: var(--cyan-dim);
-  }
-  .try-example:hover{ text-decoration-color: var(--cyan); }
-
-  .phoneme-preview{
-    margin-top: 10px;
-    font-family: var(--font-mono);
+  .history-empty {
+    text-align: center;
+    margin: auto;
+    color: var(--text-faint);
     font-size: 13px;
-    color: var(--cyan);
-    background: var(--panel-raised);
-    border: 1px solid var(--border-soft);
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    min-height: 18px;
-    word-break: break-word;
   }
-  .phoneme-preview .tag{
-    color: var(--text-faint);
-    margin-right: 8px;
-  }
-  .phoneme-preview.empty{ color: var(--text-faint); font-style: italic; }
 
-  .controls-row{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-top: 18px;
-  }
-  @media (max-width: 560px){ .controls-row{ grid-template-columns: 1fr; } }
-
-  select#voice-select{
-    width: 100%;
-    background: var(--panel-raised);
+  .history-item {
+    background: #ffffff;
     border: 1px solid var(--border);
-    color: var(--text);
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-  }
-
-  input[type="range"]{
-    -webkit-appearance: none;
-    width: 100%;
-    height: 4px;
-    background: var(--border);
-    border-radius: 4px;
-    outline: none;
-  }
-  input[type="range"]::-webkit-slider-thumb{
-    -webkit-appearance: none;
-    width: 16px; height: 16px;
-    border-radius: 50%;
-    background: var(--amber);
-    cursor: pointer;
-    border: 2px solid #1a1204;
-    box-shadow: 0 0 0 3px var(--amber-glow);
-  }
-  input[type="range"]::-moz-range-thumb{
-    width: 16px; height: 16px;
-    border-radius: 50%;
-    background: var(--amber);
-    cursor: pointer;
-    border: 2px solid #1a1204;
-  }
-
-  .generate-row{
-    display: flex; align-items: center; gap: 14px;
-    margin-top: 22px;
-    flex-wrap: wrap;
-  }
-  .generate-hint{
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-faint);
-  }
-
-  /* ---------- Error banner ---------- */
-  .error-banner{
-    display: none;
-    margin-top: 16px;
-    background: var(--red-dim);
-    border: 1px solid rgba(232,96,76,0.35);
-    color: #ffd9d1;
     border-radius: var(--radius-sm);
     padding: 12px 14px;
-    font-size: 13.5px;
-    display: none;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  .error-banner.show{ display: flex; }
-  .error-banner svg{ width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; color: var(--red); }
-  .error-banner .msg strong{ display: block; font-family: var(--font-display); font-size: 13px; margin-bottom: 2px; color: #fff; }
-
-  /* ---------- Output panel ---------- */
-  .output-panel{ display: none; }
-  .output-panel.show{ display: block; }
-  canvas#waveform{
-    width: 100%;
-    height: 110px;
-    display: block;
-    background: var(--panel-raised);
-    border: 1px solid var(--border-soft);
-    border-radius: var(--radius-sm);
-  }
-  .playback-row{
-    display: flex; align-items: center; gap: 14px;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-  audio#player{
-    flex: 1;
-    min-width: 220px;
-    height: 36px;
-    accent-color: var(--amber);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
-  /* ---------- Footer ---------- */
-  footer{
-    margin-top: 44px;
-    padding-top: 22px;
-    border-top: 1px solid var(--border-soft);
-    font-family: var(--font-mono);
-    font-size: 11.5px;
-    color: var(--text-faint);
-    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  .history-text {
+    font-size: 12.5px;
+    color: var(--text);
+    line-height: 1.45;
+    word-break: break-word;
   }
-  footer a{ color: var(--text-faint); }
-  footer a:hover{ color: var(--cyan); }
 
-  @media (prefers-reduced-motion: reduce){
-    .signal-stage.active::after, .spinner, .progress-fill.indeterminate, .eyebrow .dot.busy{ animation: none; }
+  .history-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .history-tags { display: flex; align-items: center; gap: 6px; }
+  
+  .tag {
+    background: var(--border-light);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .tag.purged { color: var(--amber); background: #fef3c7; border-color: #fde68a; }
+
+  .history-actions { display: flex; align-items: center; gap: 4px; }
+
+  .btn-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }
+  .btn-icon:hover { color: var(--text); background: var(--border-light); }
+  .btn-icon.delete:hover { color: var(--red); background: #fee2e2; }
+  .btn-icon svg { width: 14px; height: 14px; }
+
+  @media (max-width: 900px) {
+    .container { grid-template-columns: 1fr; }
+    .history-card { min-height: 380px; }
   }
 </style>
 </head>
 <body>
 
-<div class="wrap">
-
-  <header class="app-header">
-    <div class="eyebrow"><span class="dot offline" id="status-dot"></span><span id="status-text">Model not loaded</span></div>
-    <h1 class="title">Kitten TTS <span class="accent">· Nano</span></h1>
-    <p class="subtitle">
-      A 15M-parameter, INT8-quantized speech model that runs the entire pipeline — phonemization, tensor inference,
-      and audio rendering — locally in this tab via <code>onnxruntime-web</code>. Nothing you type ever leaves your browser.
-    </p>
-
-    <div class="signal-path" id="signal-path" aria-hidden="true">
-      <div class="signal-stage" data-stage="text"><div class="num">01</div><div class="label">Text</div></div>
-      <div class="signal-stage" data-stage="phonemize"><div class="num">02</div><div class="label">Phonemes</div></div>
-      <div class="signal-stage" data-stage="infer"><div class="num">03</div><div class="label">Neural Net</div></div>
-      <div class="signal-stage" data-stage="render"><div class="num">04</div><div class="label">Waveform</div></div>
-    </div>
-  </header>
-
-  <!-- Model / cache panel -->
-  <section class="panel" id="model-panel">
-    <h2>Model
-      <span class="badge not-cached" id="cache-badge">checking cache…</span>
-    </h2>
-    <div class="model-meta">
-      <span>kitten-tts-nano-0.1</span>
-      <span>·</span>
-      <span>style_text_to_speech_2 / ONNX, INT8</span>
-      <span>·</span>
-      <a href="https://huggingface.co/KittenML/kitten-tts-nano-0.1" target="_blank" rel="noopener">source ↗</a>
-    </div>
-
-    <div class="progress-row">
-      <div class="progress-status">
-        <span id="progress-label">Waiting to start…</span>
-        <span class="pct" id="progress-pct"></span>
+<div class="container">
+  <!-- LEFT COLUMN -->
+  <div class="left-col">
+    <!-- Top Identity / Summary Card -->
+    <div class="identity-card">
+      <div class="brand-group">
+        <div class="brand-logo-wrap">
+          <!-- Kitten TTS Official Brand Vector Logo -->
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 11.5L10.5 7L14.5 11.5H17.5L21.5 7L25 11.5C26 13.5 26.2 16 26 18.5C25.5 22.5 21.8 25.5 16 25.5C10.2 25.5 6.5 22.5 6 18.5C5.8 16 6 13.5 7 11.5Z" fill="#F2A93C"/>
+            <circle cx="11.5" cy="16.5" r="1.75" fill="#111317"/>
+            <circle cx="20.5" cy="16.5" r="1.75" fill="#111317"/>
+            <path d="M14.5 19.5C15.2 20.2 16.8 20.2 17.5 19.5" stroke="#111317" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-meta">
+          <h1>Kitten TTS Studio</h1>
+          <p>Local On-Device Voice Synthesis</p>
+        </div>
       </div>
-      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-    </div>
-
-    <div class="cache-actions">
-      <button class="btn small ghost" id="retry-load-btn" style="display:none;">Retry download</button>
-      <button class="btn small danger ghost" id="clear-cache-btn">Delete cached model</button>
-    </div>
-
-    <div class="error-banner" id="model-error">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <div class="msg"><strong>Couldn't load the model</strong><span id="model-error-text"></span></div>
-    </div>
-  </section>
-
-  <!-- Synthesis panel -->
-  <section class="panel">
-    <h2>Synthesize</h2>
-
-    <div class="field">
-      <div class="field-label">
-        <span>Text <button class="try-example" id="try-example-btn" type="button">try an example</button></span>
-        <span class="count" id="char-count">0 / 2000</span>
+      <div class="stats-badges">
+        <span class="stat-pill">24 kHz</span>
+        <span class="stat-pill">WASM SIMD</span>
+        <span class="stat-pill">0ms Server</span>
       </div>
-      <textarea id="text-input" maxlength="2000" placeholder="Type or paste text to synthesize. Punctuation and sentence structure affect pacing, so full sentences sound most natural."></textarea>
-      <div class="phoneme-preview empty" id="phoneme-preview">Phoneme preview will appear here as you type…</div>
     </div>
 
-    <div class="controls-row">
+    <!-- Engine & Model Cache Card -->
+    <div class="model-card">
+      <div class="model-header">
+        <div>
+          <div class="model-info-title">Model Engine</div>
+          <div class="model-info-sub">kitten-tts-nano-0.1 (INT8)</div>
+        </div>
+        <div class="status-badge">
+          <div class="dot" id="status-dot"></div>
+          <span id="status-text">Checking cache…</span>
+        </div>
+      </div>
+
+      <!-- Live Download Monitor -->
+      <div class="download-progress" id="download-progress">
+        <div class="progress-info">
+          <span id="dp-label">Downloading model (23.8 MB)…</span>
+          <span id="dp-pct">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="dp-fill"></div>
+        </div>
+      </div>
+
+      <div class="model-footer">
+        <span class="model-size-label" id="cache-size-label">Local Storage: Uncached</span>
+        <button class="btn-delete-cache" id="delete-cache-btn">Delete Cached Model</button>
+      </div>
+    </div>
+
+    <!-- Synthesizer Card -->
+    <div class="card synth-card">
+      <div class="card-header" style="margin-bottom: 0;">
+        <h2 class="card-title">Synthesize Speech</h2>
+      </div>
+
       <div class="field">
-        <div class="field-label"><span>Voice</span></div>
-        <select id="voice-select">
-          <optgroup label="Voice 2">
+        <div class="field-label">
+          <span>Input Prompt</span>
+          <span class="counter" id="char-counter">0 / 2000</span>
+        </div>
+        <textarea class="input-text" id="text-input" maxlength="2000" placeholder="Enter text to synthesize...">Welcome to Kitten TTS. This voice model runs entirely inside your browser using quantized WebAssembly.</textarea>
+      </div>
+
+      <div class="controls-row">
+        <div class="field">
+          <div class="field-label"><span>Voice Persona</span></div>
+          <select class="input-select" id="voice-select">
             <option value="expr-voice-2-m">Voice 2 — Male</option>
             <option value="expr-voice-2-f">Voice 2 — Female</option>
-          </optgroup>
-          <optgroup label="Voice 3">
             <option value="expr-voice-3-m">Voice 3 — Male</option>
             <option value="expr-voice-3-f">Voice 3 — Female</option>
-          </optgroup>
-          <optgroup label="Voice 4">
             <option value="expr-voice-4-m">Voice 4 — Male</option>
             <option value="expr-voice-4-f">Voice 4 — Female</option>
-          </optgroup>
-          <optgroup label="Voice 5">
             <option value="expr-voice-5-m" selected>Voice 5 — Male</option>
             <option value="expr-voice-5-f">Voice 5 — Female</option>
-          </optgroup>
-        </select>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span>Speed</span>
+            <span class="counter" id="speed-val">1.00×</span>
+          </div>
+          <div class="slider-container">
+            <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.05" value="1.0" />
+          </div>
+        </div>
       </div>
-      <div class="field">
-        <div class="field-label"><span>Speed</span><span class="count" id="speed-readout">1.00×</span></div>
-        <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.05" value="1.0" />
+
+      <button class="btn-generate" id="generate-btn" disabled>Generate Speech</button>
+
+      <div class="audio-output" id="audio-output">
+        <audio id="player" controls></audio>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="card history-card">
+    <div class="card-header">
+      <h2 class="card-title">Generation History</h2>
+      <div class="history-header-info">
+        <span class="pill-count" id="history-count">0 items</span>
+        <button class="btn-clear-history" id="clear-history-btn">Clear All</button>
       </div>
     </div>
 
-    <div class="generate-row">
-      <button class="btn primary" id="generate-btn" disabled>
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        Generate speech
-      </button>
-      <span class="generate-hint" id="generate-hint">Waiting for model…</span>
+    <div class="history-list" id="history-list">
+      <div class="history-empty">No generations yet. Create your first audio on the left.</div>
     </div>
-
-    <div class="error-banner" id="gen-error">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <div class="msg"><strong>Generation failed</strong><span id="gen-error-text"></span></div>
-    </div>
-  </section>
-
-  <!-- Output panel -->
-  <section class="panel output-panel" id="output-panel">
-    <h2>Output <span class="badge" id="output-meta"></span></h2>
-    <canvas id="waveform"></canvas>
-    <div class="playback-row">
-      <audio id="player" controls></audio>
-      <a class="btn" id="download-btn" download="kitten-tts-output.wav">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
-        Download .wav
-      </a>
-    </div>
-  </section>
-
-  <footer>
-    <span>Runs 100% client-side · onnxruntime-web (WASM) · phonemizer.js (espeak-ng)</span>
-    <span>Model: <a href="https://huggingface.co/KittenML/kitten-tts-nano-0.1" target="_blank" rel="noopener">KittenML/kitten-tts-nano-0.1</a> (Apache-2.0)</span>
-  </footer>
-
+  </div>
 </div>
 
-<!-- ============================================================
-     Worker source, embedded inline so the whole app stays a
-     single file. Loaded as text and turned into a Blob Worker
-     at runtime — this is a classic (non-module) worker so it can
-     use importScripts() to pull in the ONNX Runtime Web UMD build.
-     ============================================================ -->
+<!-- Embedded ONNX WASM Worker -->
 <script type="text/plain" id="worker-source">
 "use strict";
-
-// ONNX Runtime Web (WASM execution provider only -- the INT8-quantized
-// graph uses MatMulInteger / DynamicQuantizeLSTM ops that are not
-// supported by the WebGPU EP in onnxruntime-web, so WASM is the only
-// backend that reliably avoids NaN / corrupted output for this model).
 importScripts("https://cdn.jsdelivr.net/npm/onnxruntime-web@1.27.0/dist/ort.min.js");
 
 ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.27.0/dist/";
-// Single-threaded: avoids requiring cross-origin-isolation (COOP/COEP)
-// headers, which a plain static index.html generally won't have.
 ort.env.wasm.numThreads = 1;
 ort.env.wasm.simd = true;
 
@@ -629,9 +629,9 @@ self.onmessage = async function (e) {
         executionProviders: ["wasm"],
         graphOptimizationLevel: "all",
       });
-      reply({ type: "init-done", id, outputName: session.outputNames[0] });
+      reply({ type: "init-done", id });
     } else if (type === "infer") {
-      if (!session) throw new Error("Inference session is not initialized yet.");
+      if (!session) throw new Error("Inference session is not ready.");
       const { inputIds, style, styleDim, speed } = data;
       const idsBig = new BigInt64Array(inputIds.length);
       for (let i = 0; i < inputIds.length; i++) idsBig[i] = BigInt(inputIds[i]);
@@ -647,71 +647,34 @@ self.onmessage = async function (e) {
       });
 
       const outName = session.outputNames[0];
-      const raw = outputs[outName].data; // Float32Array (may be a typed-array view)
+      const raw = outputs[outName].data;
 
       let hasNaN = false;
       for (let i = 0; i < raw.length; i++) {
         if (Number.isNaN(raw[i])) { hasNaN = true; break; }
       }
 
-      // The vocoder appends a short trailing tail/artifact; trim it,
-      // matching the reference KittenTTS implementation, but only
-      // when the chunk is long enough that trimming won't zero it out.
       const trimmed = raw.length > 24000 ? raw.subarray(0, raw.length - 5000) : raw;
-      const out = new Float32Array(trimmed); // fresh, transferable backing buffer
+      const out = new Float32Array(trimmed);
 
       reply({ type: "infer-done", id, audio: out.buffer, hasNaN }, [out.buffer]);
-    } else {
-      throw new Error("Unknown worker message type: " + type);
     }
   } catch (err) {
     reply({ type: "error", id, error: (err && err.message) || String(err) });
   }
 };
-
-self.onerror = function (e) {
-  reply({ type: "error", error: (e && e.message) || "Unknown worker error" });
-};
-self.addEventListener("unhandledrejection", function (e) {
-  reply({ type: "error", error: (e.reason && e.reason.message) || String(e.reason) });
-});
 </script>
 
 <script type="module">
-// =========================================================================
-// Kitten TTS Nano — single-file browser client
-//
-// Pipeline (matches the official KittenML/KittenTTS reference implementation):
-//   text -> punctuation-preserving espeak-ng phonemization (phonemizer.js,
-//   a WASM build of espeak-ng) -> character-level token IDs (fixed 178-symbol
-//   table used by the model's text encoder) -> per-length voice style vector
-//   -> ONNX Runtime Web (WASM EP) -> 24kHz float32 PCM -> WAV.
-//
-// Model source: https://huggingface.co/KittenML/kitten-tts-nano-0.1
-//   - kitten_tts_nano_v0_1.onnx  (~23.8 MB, INT8)
-//   - voices.npz                 (~10 KB, 8 voice-style embeddings)
-// =========================================================================
-
 import { phonemize } from "https://cdn.jsdelivr.net/npm/phonemizer@1.2.1/+esm";
 
-// ---------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------
 const REPO = "KittenML/kitten-tts-nano-0.1";
-const MODEL_FILE = "kitten_tts_nano_v0_1.onnx";
-const VOICES_FILE = "voices.npz";
-const resolveUrl = (file) => `https://huggingface.co/${REPO}/resolve/main/${file}`;
-const MODEL_URL = resolveUrl(MODEL_FILE);
-const VOICES_URL = resolveUrl(VOICES_FILE);
-
+const MODEL_URL = `https://huggingface.co/${REPO}/resolve/main/kitten_tts_nano_v0_1.onnx`;
+const VOICES_URL = `https://huggingface.co/${REPO}/resolve/main/voices.npz`;
 const CACHE_NAME = "kitten-tts-nano-0.1-v1";
 const SAMPLE_RATE = 24000;
-const MAX_CHUNK_CHARS = 400;
-const MAX_INPUT_CHARS = 2000;
+const MAX_AUDIO_STORED = 6;
 
-// Exact 178-symbol table from the model's TextCleaner (KittenTTS
-// kittentts/onnx_model.py). Index 0 is the pad/BOS/EOS token; index 10
-// (the ellipsis "…") is used as an end-of-utterance marker.
 const PAD = "$";
 const PUNCTUATION_SYMS = ';:,.!?¡¿—…"«»"" ';
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -720,96 +683,174 @@ const SYMBOLS = [PAD, ...PUNCTUATION_SYMS, ...LETTERS, ...LETTERS_IPA];
 const CHAR_TO_ID = Object.create(null);
 SYMBOLS.forEach((s, i) => { CHAR_TO_ID[s] = i; });
 
-// Clusters of punctuation (with surrounding whitespace) that we strip out
-// before handing text to espeak, then splice back in verbatim afterwards --
-// this reproduces the official Python pipeline's preserve_punctuation=True
-// behavior, since the WASM phonemizer itself discards punctuation.
 const PUNCT_CLUSTER_RE = /(\s*[;:,.!?¡¿—…"«»""()[\]{}]+\s*)+/g;
 const TOKEN_RE = /[\p{L}\p{N}_]+|[^\p{L}\p{N}_\s]/gu;
 
-const VOICE_LABELS = {
-  "expr-voice-2-m": "Voice 2 — Male", "expr-voice-2-f": "Voice 2 — Female",
-  "expr-voice-3-m": "Voice 3 — Male", "expr-voice-3-f": "Voice 3 — Female",
-  "expr-voice-4-m": "Voice 4 — Male", "expr-voice-4-f": "Voice 4 — Female",
-  "expr-voice-5-m": "Voice 5 — Male", "expr-voice-5-f": "Voice 5 — Female",
-};
-
-const EXAMPLE_TEXT = "Kitten TTS is a fifteen million parameter speech model, small enough to run entirely inside a browser tab. No server, no API key, and no audio ever leaves this device.";
-
-// ---------------------------------------------------------------------
-// DOM references
-// ---------------------------------------------------------------------
 const el = (id) => document.getElementById(id);
 const statusDot = el("status-dot");
 const statusText = el("status-text");
-const cacheBadge = el("cache-badge");
-const progressLabel = el("progress-label");
-const progressPct = el("progress-pct");
-const progressFill = el("progress-fill");
-const clearCacheBtn = el("clear-cache-btn");
-const retryLoadBtn = el("retry-load-btn");
-const modelErrorBanner = el("model-error");
-const modelErrorText = el("model-error-text");
-
+const cacheSizeLabel = el("cache-size-label");
+const deleteCacheBtn = el("delete-cache-btn");
 const textInput = el("text-input");
-const charCount = el("char-count");
-const phonemePreview = el("phoneme-preview");
-const tryExampleBtn = el("try-example-btn");
+const charCounter = el("char-counter");
 const voiceSelect = el("voice-select");
 const speedSlider = el("speed-slider");
-const speedReadout = el("speed-readout");
+const speedVal = el("speed-val");
 const generateBtn = el("generate-btn");
-const generateHint = el("generate-hint");
-const genErrorBanner = el("gen-error");
-const genErrorText = el("gen-error-text");
-
-const outputPanel = el("output-panel");
-const outputMeta = el("output-meta");
-const waveformCanvas = el("waveform");
+const audioOutput = el("audio-output");
 const player = el("player");
-const downloadBtn = el("download-btn");
+const dpCard = el("download-progress");
+const dpLabel = el("dp-label");
+const dpPct = el("dp-pct");
+const dpFill = el("dp-fill");
+const historyList = el("history-list");
+const historyCount = el("history-count");
+const clearHistoryBtn = el("clear-history-btn");
 
-const signalStages = {
-  text: document.querySelector('.signal-stage[data-stage="text"]'),
-  phonemize: document.querySelector('.signal-stage[data-stage="phonemize"]'),
-  infer: document.querySelector('.signal-stage[data-stage="infer"]'),
-  render: document.querySelector('.signal-stage[data-stage="render"]'),
-};
-
-// ---------------------------------------------------------------------
-// App state
-// ---------------------------------------------------------------------
 const state = {
   modelReady: false,
   isGenerating: false,
-  voices: null,       // { [voiceName]: { data: Float32Array, shape: [n, dim] } }
+  voices: null,
   worker: null,
   workerReqId: 0,
   workerPending: new Map(),
-  lastAudio: null,
-  lastWavUrl: null,
+  history: []
 };
 
-// =========================================================================
-// Tiny ZIP + NPY reader (enough to read a NumPy .npz voice bank in-browser,
-// with no external dependency). NPZ is just a standard ZIP archive of .npy
-// files, so this is a minimal ZIP central-directory reader plus a NPY v1/v2
-// header parser. DEFLATE entries are decompressed with the native
-// DecompressionStream API; STORED entries are copied directly.
-// =========================================================================
+/* --- IndexedDB Storage Helper for History --- */
+const DB_NAME = "kitten_tts_history_db";
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore("history", { keyPath: "id" });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveHistoryItem(item) {
+  const db = await openDB();
+  if (state.history.length >= MAX_AUDIO_STORED) {
+    for (let i = MAX_AUDIO_STORED - 1; i < state.history.length; i++) {
+      if (state.history[i].audioBlob) {
+        state.history[i].audioBlob = null;
+        state.history[i].audioPurged = true;
+        const tx = db.transaction("history", "readwrite");
+        tx.objectStore("history").put(state.history[i]);
+      }
+    }
+  }
+
+  state.history.unshift(item);
+  const tx = db.transaction("history", "readwrite");
+  tx.objectStore("history").put(item);
+  renderHistory();
+}
+
+async function loadHistory() {
+  try {
+    const db = await openDB();
+    const tx = db.transaction("history", "readonly");
+    const req = tx.objectStore("history").getAll();
+    req.onsuccess = () => {
+      state.history = (req.result || []).sort((a, b) => b.timestamp - a.timestamp);
+      renderHistory();
+    };
+  } catch (e) {
+    console.warn("Could not load history:", e);
+  }
+}
+
+async function deleteHistoryItem(id) {
+  const db = await openDB();
+  const tx = db.transaction("history", "readwrite");
+  tx.objectStore("history").delete(id);
+  state.history = state.history.filter(h => h.id !== id);
+  renderHistory();
+}
+
+async function clearAllHistory() {
+  const db = await openDB();
+  const tx = db.transaction("history", "readwrite");
+  tx.objectStore("history").clear();
+  state.history = [];
+  renderHistory();
+}
+
+function renderHistory() {
+  historyCount.textContent = `${state.history.length} items`;
+  if (!state.history.length) {
+    historyList.innerHTML = '<div class="history-empty">No generations yet. Create your first audio on the left.</div>';
+    return;
+  }
+
+  historyList.innerHTML = "";
+  state.history.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "history-item";
+
+    const hasAudio = !!item.audioBlob;
+    let audioUrl = hasAudio ? URL.createObjectURL(item.audioBlob) : null;
+
+    div.innerHTML = `
+      <div class="history-text">${escapeHtml(item.text)}</div>
+      <div class="history-meta">
+        <div class="history-tags">
+          <span class="tag">${item.voice}</span>
+          <span class="tag">${item.speed}x</span>
+          ${item.audioPurged ? '<span class="tag purged">Audio pruned</span>' : ''}
+        </div>
+        <div class="history-actions">
+          ${hasAudio ? `
+            <button class="btn-icon play-btn" title="Play">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <a class="btn-icon" href="${audioUrl}" download="kitten-${item.id}.wav" title="Download">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+            </a>
+          ` : ''}
+          <button class="btn-icon delete" data-id="${item.id}" title="Delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+
+    if (hasAudio) {
+      div.querySelector(".play-btn").addEventListener("click", () => {
+        player.src = audioUrl;
+        audioOutput.classList.add("show");
+        player.play();
+      });
+    }
+
+    div.querySelector(".delete").addEventListener("click", (e) => {
+      const id = e.currentTarget.getAttribute("data-id");
+      deleteHistoryItem(id);
+    });
+
+    historyList.appendChild(div);
+  });
+}
+
+function escapeHtml(text) {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+/* --- NPZ / NPY Reader --- */
 async function unzip(arrayBuffer) {
   const bytes = new Uint8Array(arrayBuffer);
   const view = new DataView(arrayBuffer);
-
   let eocd = -1;
   for (let i = bytes.length - 22; i >= 0; i--) {
     if (view.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
   }
-  if (eocd === -1) throw new Error("voices.npz does not look like a valid ZIP archive.");
+  if (eocd === -1) throw new Error("Invalid ZIP.");
 
   const totalEntries = view.getUint16(eocd + 10, true);
   const cdOffset = view.getUint32(eocd + 16, true);
-
   const entries = [];
   let cursor = cdOffset;
   for (let i = 0; i < totalEntries; i++) {
@@ -832,7 +873,6 @@ async function unzip(arrayBuffer) {
     const lNameLen = view.getUint16(lh + 26, true);
     const lExtraLen = view.getUint16(lh + 28, true);
     const dataStart = lh + 30 + lNameLen + lExtraLen;
-
     let data;
     if (entry.compressionMethod === 0) {
       data = bytes.slice(dataStart, dataStart + entry.uncompressedSize);
@@ -854,58 +894,28 @@ async function unzip(arrayBuffer) {
       data = new Uint8Array(total);
       let off = 0;
       for (const p of parts) { data.set(p, off); off += p.length; }
-    } else {
-      console.warn(`Skipping ${entry.fileName}: unsupported ZIP compression method ${entry.compressionMethod}`);
-      continue;
     }
     files.set(entry.fileName, data);
   }
   return files;
 }
 
-function parseNpyHeader(bytes) {
-  if (bytes[0] !== 0x93 || new TextDecoder().decode(bytes.slice(1, 6)) !== "NUMPY") {
-    throw new Error("Not a valid .npy entry.");
-  }
+function parseNpy(bytes) {
   const majorVersion = bytes[6];
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  let headerLen, headerStart;
-  if (majorVersion === 1) {
-    headerLen = view.getUint16(8, true);
-    headerStart = 10;
-  } else {
-    headerLen = view.getUint32(8, true);
-    headerStart = 12;
-  }
+  let headerLen = majorVersion === 1 ? view.getUint16(8, true) : view.getUint32(8, true);
+  let headerStart = majorVersion === 1 ? 10 : 12;
   const headerStr = new TextDecoder().decode(bytes.slice(headerStart, headerStart + headerLen));
   const descrMatch = headerStr.match(/'descr'\s*:\s*'([^']+)'/);
   const shapeMatch = headerStr.match(/'shape'\s*:\s*\(([^)]*)\)/);
-  if (!descrMatch) throw new Error("Could not parse dtype from .npy header.");
-  const shape = shapeMatch
-    ? shapeMatch[1].split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => !Number.isNaN(n))
-    : [];
-  return { descr: descrMatch[1], shape, dataOffset: headerStart + headerLen };
-}
-
-function parseNpy(bytes) {
-  const { descr, shape, dataOffset } = parseNpyHeader(bytes);
-  const raw = bytes.slice(dataOffset);
+  const shape = shapeMatch ? shapeMatch[1].split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => !Number.isNaN(n)) : [];
+  const raw = bytes.slice(headerStart + headerLen);
   const buf = raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength);
-  let data;
-  if (descr === "<f4" || descr === "float32") {
-    data = new Float32Array(buf);
-  } else if (descr === "<f8" || descr === "float64") {
-    const f64 = new Float64Array(buf);
-    data = new Float32Array(f64.length);
-    for (let i = 0; i < f64.length; i++) data[i] = f64[i];
-  } else {
-    throw new Error(`Unsupported voice embedding dtype: ${descr}`);
-  }
-  return { data, shape };
+  return { data: new Float32Array(buf), shape };
 }
 
-async function loadVoicesFromNpz(arrayBuffer) {
-  const files = await unzip(arrayBuffer);
+async function loadVoices(buf) {
+  const files = await unzip(buf);
   const voices = {};
   for (const [name, bytes] of files) {
     if (!name.endsWith(".npy")) continue;
@@ -916,33 +926,19 @@ async function loadVoicesFromNpz(arrayBuffer) {
   return voices;
 }
 
-// =========================================================================
-// Text -> phonemes -> token IDs
-// =========================================================================
-function charsToIds(text) {
+/* --- Tokenization & Phonemization --- */
+function tokenizeToInputIds(cleanedPhonemeText) {
   const ids = [];
-  for (const ch of text) {
+  for (const ch of cleanedPhonemeText) {
     const id = CHAR_TO_ID[ch];
     if (id !== undefined) ids.push(id);
   }
+  ids.unshift(0);
+  ids.push(10);
+  ids.push(0);
   return ids;
 }
 
-function tokenizeToInputIds(cleanedPhonemeText) {
-  const ids = charsToIds(cleanedPhonemeText);
-  ids.unshift(0);  // BOS
-  ids.push(10);    // end-of-utterance marker ("…")
-  ids.push(0);     // EOS
-  return ids;
-}
-
-function basicEnglishTokenize(text) {
-  return text.match(TOKEN_RE) || [];
-}
-
-// Phonemize `text` while preserving punctuation exactly where it appears,
-// since the WASM espeak-ng backend strips it. Returns the raw phoneme
-// string plus the whitespace-normalized version used for tokenization.
 async function phonemizeWithPunctuation(text) {
   const segments = [];
   let last = 0;
@@ -954,127 +950,59 @@ async function phonemizeWithPunctuation(text) {
   if (last < text.length) segments.push({ punct: false, text: text.slice(last) });
 
   const parts = await Promise.all(segments.map(async (seg) => {
-    if (seg.punct) return seg.text;
-    if (!seg.text.trim()) return seg.text;
+    if (seg.punct || !seg.text.trim()) return seg.text;
     const phones = await phonemize(seg.text, "en-us");
     return phones.join(" ");
   }));
 
   const phonemeString = parts.join("");
-  const cleaned = basicEnglishTokenize(phonemeString).join(" ");
-  return { phonemeString, cleaned };
+  const cleaned = (phonemeString.match(TOKEN_RE) || []).join(" ");
+  return { cleaned };
 }
 
-function ensureTrailingPunctuation(sentence) {
-  const t = sentence.trim();
-  if (!t) return t;
-  return ".!?,;:".includes(t[t.length - 1]) ? t : t + ".";
-}
-
-// Split long input into <=maxLen chunks on sentence boundaries (falling
-// back to word boundaries for very long sentences), matching the
-// reference browser implementation's chunking strategy.
-function chunkText(text, maxLen = MAX_CHUNK_CHARS) {
+function chunkText(text, maxLen = 400) {
   const sentences = text.match(/[^.!?]*[.!?]+|[^.!?]+$/g) || [text];
   const chunks = [];
   for (let s of sentences) {
     s = s.trim();
     if (!s) continue;
-    if (s.length <= maxLen) {
-      chunks.push(ensureTrailingPunctuation(s));
-      continue;
-    }
-    const words = s.split(/\s+/);
-    let cur = "";
-    for (const w of words) {
-      if (cur.length + w.length + 1 <= maxLen) {
-        cur += (cur ? " " : "") + w;
-      } else {
-        if (cur) chunks.push(ensureTrailingPunctuation(cur));
-        cur = w;
-      }
-    }
-    if (cur) chunks.push(ensureTrailingPunctuation(cur));
+    chunks.push(".!?,;:".includes(s[s.length - 1]) ? s : s + ".");
   }
   return chunks.length ? chunks : [text];
 }
 
-// =========================================================================
-// Cache-aware download with live progress
-// =========================================================================
-function cachesAvailable() {
-  return "caches" in window;
-}
-
+/* --- Cache & Download --- */
 async function getCachedBuffer(url) {
-  if (!cachesAvailable()) return null;
+  if (!("caches" in window)) return null;
   try {
     const cache = await caches.open(CACHE_NAME);
     const res = await cache.match(url);
-    if (!res) return null;
-    return await res.arrayBuffer();
-  } catch {
-    return null;
-  }
+    return res ? await res.arrayBuffer() : null;
+  } catch { return null; }
 }
 
 async function putInCache(url, arrayBuffer) {
-  if (!cachesAvailable()) return;
+  if (!("caches" in window)) return;
   try {
     const cache = await caches.open(CACHE_NAME);
-    await cache.put(url, new Response(arrayBuffer.slice(0), {
-      headers: { "Content-Type": "application/octet-stream", "Content-Length": String(arrayBuffer.byteLength) },
-    }));
-  } catch (e) {
-    console.warn("Could not persist model asset to cache:", e);
-  }
+    await cache.put(url, new Response(arrayBuffer.slice(0)));
+  } catch {}
 }
 
-async function isFullyCached() {
-  const [m, v] = await Promise.all([getCachedBuffer(MODEL_URL), getCachedBuffer(VOICES_URL)]);
-  return !!(m && v) ? { model: m, voices: v } : null;
-}
-
-function formatMB(bytes) { return (bytes / (1024 * 1024)).toFixed(1); }
-function formatSpeed(bytesPerSec) {
-  if (!bytesPerSec || !isFinite(bytesPerSec)) return "";
-  return `${(bytesPerSec / (1024 * 1024)).toFixed(2)} MB/s`;
-}
-
-// Downloads a URL with byte-level progress, falling back to indeterminate
-// progress if the server doesn't expose Content-Length cross-origin.
 async function fetchWithProgress(url, onProgress) {
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`HTTP ${response.status} while downloading ${url.split("/").pop()}`);
   const total = parseInt(response.headers.get("content-length") || "0", 10);
-
-  if (!response.body) {
-    // Streaming not supported (very old browser) -- fall back to a single await.
-    const buf = await response.arrayBuffer();
-    onProgress({ loaded: buf.byteLength, total: buf.byteLength, speed: 0 });
-    return buf;
-  }
-
   const reader = response.body.getReader();
   const chunks = [];
   let loaded = 0;
-  let lastTime = performance.now();
-  let lastLoaded = 0;
 
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
     chunks.push(value);
     loaded += value.length;
-    const now = performance.now();
-    if (now - lastTime > 120) {
-      const speed = ((loaded - lastLoaded) / ((now - lastTime) / 1000)) || 0;
-      onProgress({ loaded, total, speed });
-      lastTime = now;
-      lastLoaded = loaded;
-    }
+    if (total > 0) onProgress(Math.round((loaded / total) * 100));
   }
-  onProgress({ loaded, total, speed: 0, done: true });
 
   const merged = new Uint8Array(loaded);
   let offset = 0;
@@ -1082,26 +1010,17 @@ async function fetchWithProgress(url, onProgress) {
   return merged.buffer;
 }
 
-// =========================================================================
-// Worker plumbing (Blob-based classic worker so the whole app is one file)
-// =========================================================================
-function createTtsWorker() {
+/* --- Worker Dispatch --- */
+function createWorker() {
   const src = document.getElementById("worker-source").textContent;
   const blob = new Blob([src], { type: "application/javascript" });
   const worker = new Worker(URL.createObjectURL(blob));
   worker.onmessage = (e) => {
-    const { id } = e.data || {};
-    const pending = state.workerPending.get(id);
+    const pending = state.workerPending.get(e.data.id);
     if (!pending) return;
-    state.workerPending.delete(id);
-    if (e.data.type === "error") pending.reject(new Error(e.data.error || "Worker error"));
+    state.workerPending.delete(e.data.id);
+    if (e.data.type === "error") pending.reject(new Error(e.data.error));
     else pending.resolve(e.data);
-  };
-  worker.onerror = (e) => {
-    // Reject every outstanding request -- a top-level worker error means
-    // the session is in an unknown state.
-    for (const [, pending] of state.workerPending) pending.reject(new Error(e.message || "Worker crashed"));
-    state.workerPending.clear();
   };
   return worker;
 }
@@ -1114,381 +1033,153 @@ function callWorker(type, payload, transfer) {
   });
 }
 
-// =========================================================================
-// UI helpers
-// =========================================================================
-function setStatus(kind, text) {
-  statusDot.className = "dot" + (kind ? " " + kind : "");
-  statusText.textContent = text;
-}
-
-function setCacheBadge(kind, text) {
-  cacheBadge.className = "badge" + (kind ? " " + kind : "");
-  cacheBadge.textContent = text;
-}
-
-function setPipelineStage(stage) {
-  const order = ["text", "phonemize", "infer", "render"];
-  const idx = stage ? order.indexOf(stage) : -1;
-  order.forEach((s, i) => {
-    const node = signalStages[s];
-    node.classList.remove("active", "done");
-    if (idx === -1) return;
-    if (i < idx || (stage === "done-all")) node.classList.add("done");
-    else if (i === idx) node.classList.add("active");
-  });
-  if (stage === "done-all") order.forEach((s) => signalStages[s].classList.add("done"));
-}
-
-function showModelError(message) {
-  modelErrorText.textContent = message;
-  modelErrorBanner.classList.add("show");
-  retryLoadBtn.style.display = "inline-flex";
-  setCacheBadge("error", "load failed");
-  setStatus("error", "Model failed to load");
-}
-function clearModelError() {
-  modelErrorBanner.classList.remove("show");
-  retryLoadBtn.style.display = "none";
-}
-
-function showGenError(message) {
-  genErrorText.textContent = message;
-  genErrorBanner.classList.add("show");
-}
-function clearGenError() { genErrorBanner.classList.remove("show"); }
-
-function updateCharCount() {
-  const n = textInput.value.length;
-  charCount.textContent = `${n} / ${MAX_INPUT_CHARS}`;
-  charCount.classList.toggle("limit", n >= MAX_INPUT_CHARS);
-}
-
-function setGenerating(isGenerating) {
-  state.isGenerating = isGenerating;
-  generateBtn.disabled = isGenerating || !state.modelReady;
-  voiceSelect.disabled = isGenerating;
-  speedSlider.disabled = isGenerating;
-  generateBtn.classList.toggle("busy", isGenerating);
-  generateBtn.innerHTML = isGenerating
-    ? '<span class="spinner"></span> Generating…'
-    : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Generate speech';
-}
-
-// =========================================================================
-// WAV encoding (16-bit PCM, mono)
-// =========================================================================
-function encodeWavPCM16(float32Audio, sampleRate) {
-  const numSamples = float32Audio.length;
-  const blockAlign = 2;
-  const byteRate = sampleRate * blockAlign;
-  const dataSize = numSamples * 2;
-  const buf = new ArrayBuffer(44 + dataSize);
+function encodeWav(float32Audio, sampleRate) {
+  const buf = new ArrayBuffer(44 + float32Audio.length * 2);
   const view = new DataView(buf);
-
   const writeStr = (offset, str) => { for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); };
-
   writeStr(0, "RIFF");
-  view.setUint32(4, 36 + dataSize, true);
+  view.setUint32(4, 36 + float32Audio.length * 2, true);
   writeStr(8, "WAVE");
   writeStr(12, "fmt ");
   view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true);       // PCM
-  view.setUint16(22, 1, true);       // mono
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
   view.setUint32(24, sampleRate, true);
-  view.setUint32(28, byteRate, true);
-  view.setUint16(32, blockAlign, true);
-  view.setUint16(34, 16, true);      // bits per sample
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
   writeStr(36, "data");
-  view.setUint32(40, dataSize, true);
+  view.setUint32(40, float32Audio.length * 2, true);
 
   let offset = 44;
-  for (let i = 0; i < numSamples; i++) {
-    let s = float32Audio[i];
-    if (!Number.isFinite(s)) s = 0;           // guard against NaN / Infinity
-    s = Math.max(-1, Math.min(1, s));         // guard against clipping
+  for (let i = 0; i < float32Audio.length; i++) {
+    let s = Math.max(-1, Math.min(1, float32Audio[i] || 0));
     view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
     offset += 2;
   }
   return new Blob([buf], { type: "audio/wav" });
 }
 
-// =========================================================================
-// Waveform rendering
-// =========================================================================
-function drawWaveform(floatAudio) {
-  const canvas = waveformCanvas;
-  const dpr = window.devicePixelRatio || 1;
-  const cssW = canvas.clientWidth || 600;
-  const cssH = canvas.clientHeight || 110;
-  canvas.width = Math.round(cssW * dpr);
-  canvas.height = Math.round(cssH * dpr);
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const mid = canvas.height / 2;
-  const w = canvas.width;
-  const step = Math.max(1, Math.floor(floatAudio.length / w));
-
-  ctx.strokeStyle = "rgba(242,169,60,0.9)";
-  ctx.lineWidth = Math.max(1, dpr);
-  ctx.beginPath();
-  for (let x = 0; x < w; x++) {
-    const start = x * step;
-    let min = 1, max = -1;
-    for (let i = 0; i < step && start + i < floatAudio.length; i++) {
-      const s = floatAudio[start + i];
-      if (s < min) min = s;
-      if (s > max) max = s;
-    }
-    if (min > max) { min = 0; max = 0; }
-    ctx.moveTo(x + 0.5, mid + min * mid * 0.92);
-    ctx.lineTo(x + 0.5, mid + max * mid * 0.92);
-  }
-  ctx.stroke();
-}
-
-function drawPlayhead(fraction) {
-  const canvas = waveformCanvas;
-  drawWaveform(state.lastAudio);
-  const ctx = canvas.getContext("2d");
-  const x = Math.round(fraction * canvas.width);
-  ctx.strokeStyle = "rgba(86,210,200,0.95)";
-  ctx.lineWidth = Math.max(1, (window.devicePixelRatio || 1));
-  ctx.beginPath();
-  ctx.moveTo(x + 0.5, 0);
-  ctx.lineTo(x + 0.5, canvas.height);
-  ctx.stroke();
-}
-
-// =========================================================================
-// Model loading
-// =========================================================================
-async function refreshCacheBadge() {
-  if (!cachesAvailable()) { setCacheBadge("not-cached", "no persistent cache"); return; }
-  const hit = await isFullyCached();
-  if (hit) setCacheBadge("cached", `cached (~${formatMB(hit.model.byteLength + hit.voices.byteLength)} MB)`);
-  else setCacheBadge("not-cached", "not cached");
-}
-
-async function loadModel() {
-  clearModelError();
-  setStatus("busy", "Loading model…");
-  progressFill.classList.remove("indeterminate");
+/* --- Engine Lifecycle --- */
+async function loadEngine() {
+  statusDot.className = "dot busy";
+  statusText.textContent = "Loading engine…";
 
   try {
-    // --- voices (tiny; always fetch through the cache helper) ---
-    progressLabel.textContent = "Loading voice bank…";
-    progressPct.textContent = "";
-    let voicesBuf = await getCachedBuffer(VOICES_URL);
-    let fromCacheVoices = !!voicesBuf;
+    let [modelBuf, voicesBuf] = await Promise.all([getCachedBuffer(MODEL_URL), getCachedBuffer(VOICES_URL)]);
+
     if (!voicesBuf) {
-      voicesBuf = await fetchWithProgress(VOICES_URL, () => {});
+      voicesBuf = await fetch(VOICES_URL).then(r => r.arrayBuffer());
       await putInCache(VOICES_URL, voicesBuf);
     }
-    state.voices = await loadVoicesFromNpz(voicesBuf);
+    state.voices = await loadVoices(voicesBuf);
 
-    // --- model weights (~24MB; the part users actually want to watch) ---
-    let modelBuf = await getCachedBuffer(MODEL_URL);
-    if (modelBuf) {
-      progressLabel.textContent = `Loaded from cache — ${formatMB(modelBuf.byteLength)} MB / ${formatMB(modelBuf.byteLength)} MB`;
-      progressPct.textContent = "100%";
-      progressFill.style.width = "100%";
-    } else {
-      progressFill.style.width = "0%";
-      modelBuf = await fetchWithProgress(MODEL_URL, ({ loaded, total, speed }) => {
-        if (total > 0) {
-          const pct = Math.min(100, Math.round((loaded / total) * 100));
-          progressFill.classList.remove("indeterminate");
-          progressFill.style.width = pct + "%";
-          progressPct.textContent = pct + "%";
-          progressLabel.textContent = `Downloading model… ${formatMB(loaded)} MB / ${formatMB(total)} MB${speed ? "  ·  " + formatSpeed(speed) : ""}`;
-        } else {
-          progressFill.classList.add("indeterminate");
-          progressPct.textContent = "";
-          progressLabel.textContent = `Downloading model… ${formatMB(loaded)} MB${speed ? "  ·  " + formatSpeed(speed) : ""}`;
-        }
+    if (!modelBuf) {
+      dpCard.style.display = "block";
+      modelBuf = await fetchWithProgress(MODEL_URL, (pct) => {
+        dpPct.textContent = `${pct}%`;
+        dpFill.style.width = `${pct}%`;
       });
-      progressFill.classList.remove("indeterminate");
-      progressFill.style.width = "100%";
-      progressPct.textContent = "100%";
-      progressLabel.textContent = `Downloaded ${formatMB(modelBuf.byteLength)} MB`;
+      dpCard.style.display = "none";
       await putInCache(MODEL_URL, modelBuf);
     }
 
-    // --- hand the raw weights to the worker and compile the session ---
-    progressLabel.textContent = "Initializing WASM inference session…";
-    if (!state.worker) state.worker = createTtsWorker();
-    // Transfer a copy so the ArrayBuffer we cached above stays intact/usable.
+    if (!state.worker) state.worker = createWorker();
     const forWorker = modelBuf.slice(0);
     await callWorker("init", { modelBuffer: forWorker }, [forWorker]);
 
     state.modelReady = true;
-    setStatus(null, "Model ready");
-    progressLabel.textContent = "Ready.";
-    generateBtn.disabled = state.isGenerating;
-    generateHint.textContent = `${Object.keys(state.voices).length} voices loaded · 24kHz`;
-    await refreshCacheBadge();
+    statusDot.className = "dot ready";
+    statusText.textContent = "Ready";
+    cacheSizeLabel.textContent = "Local Storage: Cached (~23.8 MB)";
+    generateBtn.disabled = false;
   } catch (err) {
+    statusDot.className = "dot error";
+    statusText.textContent = "Offline / Error";
     console.error(err);
-    state.modelReady = false;
-    generateBtn.disabled = true;
-    generateHint.textContent = "Model unavailable.";
-    showModelError(
-      (err && err.message ? err.message : String(err)) +
-      " — this can happen from a network hiccup, a browser blocking WebAssembly/cross-origin requests, or Hugging Face being briefly unreachable. Use Retry once you've checked your connection."
-    );
   }
 }
 
-async function clearModelCache() {
-  clearCacheBtn.disabled = true;
-  try {
-    if (cachesAvailable()) await caches.delete(CACHE_NAME);
-  } finally {
-    clearCacheBtn.disabled = false;
-    await refreshCacheBadge();
-  }
-}
-
-// =========================================================================
-// Live phoneme preview (debounced)
-// =========================================================================
-let previewDebounce = null;
-function schedulePhonemePreview() {
-  clearTimeout(previewDebounce);
+async function synthesize() {
   const text = textInput.value.trim();
-  if (!text) {
-    phonemePreview.textContent = "Phoneme preview will appear here as you type…";
-    phonemePreview.classList.add("empty");
-    return;
-  }
-  previewDebounce = setTimeout(async () => {
-    try {
-      const sample = text.length > 200 ? text.slice(0, 200) : text;
-      const { phonemeString } = await phonemizeWithPunctuation(sample);
-      phonemePreview.classList.remove("empty");
-      phonemePreview.innerHTML = "";
-      const tag = document.createElement("span");
-      tag.className = "tag";
-      tag.textContent = "IPA →";
-      phonemePreview.appendChild(tag);
-      phonemePreview.appendChild(document.createTextNode(phonemeString + (text.length > 200 ? " …" : "")));
-    } catch {
-      // Phoneme preview is a nicety; silently skip on failure (e.g. before
-      // the WASM phonemizer has finished its first-run initialization).
-    }
-  }, 350);
-}
+  if (!text || state.isGenerating || !state.modelReady) return;
 
-// =========================================================================
-// Generation
-// =========================================================================
-async function generateSpeech() {
-  if (state.isGenerating || !state.modelReady) return;
-  const text = textInput.value.trim();
-  if (!text) { showGenError("Type something to synthesize first."); return; }
-
-  clearGenError();
-  setGenerating(true);
-  setPipelineStage("text");
+  state.isGenerating = true;
+  generateBtn.disabled = true;
+  generateBtn.textContent = "Synthesizing…";
+  statusDot.className = "dot busy";
 
   try {
     const voice = voiceSelect.value;
     const speed = parseFloat(speedSlider.value);
     const voiceData = state.voices[voice];
-    if (!voiceData) throw new Error(`Voice "${voice}" isn't present in the loaded voice bank.`);
     const styleDim = voiceData.shape[1];
 
-    const chunks = chunkText(text, MAX_CHUNK_CHARS);
+    const chunks = chunkText(text);
     const audioParts = [];
 
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
-      generateHint.textContent = chunks.length > 1 ? `Chunk ${i + 1} of ${chunks.length}…` : "Synthesizing…";
-
-      setPipelineStage("phonemize");
+    for (const chunk of chunks) {
       const { cleaned } = await phonemizeWithPunctuation(chunk);
       const inputIds = tokenizeToInputIds(cleaned);
-
       const refId = Math.min(chunk.length, voiceData.shape[0] - 1);
       const style = voiceData.data.slice(refId * styleDim, (refId + 1) * styleDim);
 
-      setPipelineStage("infer");
-      const result = await callWorker("infer", { inputIds, style, styleDim, speed });
-      if (result.hasNaN) {
-        throw new Error("The model produced invalid (NaN) output for this text. Try shorter or simpler input, or use \u201cDelete cached model\u201d and reload to rule out a corrupted download.");
-      }
-      audioParts.push(new Float32Array(result.audio));
+      const res = await callWorker("infer", { inputIds, style, styleDim, speed });
+      audioParts.push(new Float32Array(res.audio));
     }
 
-    setPipelineStage("render");
     const totalLen = audioParts.reduce((a, b) => a + b.length, 0);
     const full = new Float32Array(totalLen);
     let off = 0;
     for (const p of audioParts) { full.set(p, off); off += p.length; }
 
-    state.lastAudio = full;
-    const wavBlob = encodeWavPCM16(full, SAMPLE_RATE);
-    if (state.lastWavUrl) URL.revokeObjectURL(state.lastWavUrl);
-    state.lastWavUrl = URL.createObjectURL(wavBlob);
+    const wavBlob = encodeWav(full, SAMPLE_RATE);
+    const url = URL.createObjectURL(wavBlob);
+    player.src = url;
+    audioOutput.classList.add("show");
+    player.play();
 
-    player.src = state.lastWavUrl;
-    downloadBtn.href = state.lastWavUrl;
-    const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-    downloadBtn.download = `kitten-tts-${stamp}.wav`;
+    saveHistoryItem({
+      id: Date.now().toString(),
+      text,
+      voice: voiceSelect.options[voiceSelect.selectedIndex].text.split("—")[0].trim(),
+      speed: speed.toFixed(2),
+      timestamp: Date.now(),
+      audioBlob: wavBlob
+    });
 
-    const durationSec = full.length / SAMPLE_RATE;
-    outputMeta.textContent = `${durationSec.toFixed(1)}s · ${SAMPLE_RATE / 1000}kHz · 16-bit PCM`;
-    outputPanel.classList.add("show");
-    drawWaveform(full);
-
-    setPipelineStage("done-all");
-    generateHint.textContent = `${Object.keys(state.voices).length} voices loaded · 24kHz`;
   } catch (err) {
     console.error(err);
-    showGenError(err && err.message ? err.message : String(err));
-    setPipelineStage(null);
+    alert("Speech generation failed: " + err.message);
   } finally {
-    setGenerating(false);
+    state.isGenerating = false;
+    generateBtn.disabled = false;
+    generateBtn.textContent = "Generate Speech";
+    statusDot.className = "dot ready";
   }
 }
 
-// =========================================================================
-// Wire up events
-// =========================================================================
-textInput.addEventListener("input", () => { updateCharCount(); schedulePhonemePreview(); });
-tryExampleBtn.addEventListener("click", () => {
-  textInput.value = EXAMPLE_TEXT;
-  updateCharCount();
-  schedulePhonemePreview();
-  textInput.focus();
+// Events
+textInput.addEventListener("input", () => {
+  charCounter.textContent = `${textInput.value.length} / 2000`;
 });
-
-speedSlider.addEventListener("input", () => {
-  speedReadout.textContent = parseFloat(speedSlider.value).toFixed(2) + "×";
+speedSlider.addEventListener("input", (e) => {
+  speedVal.textContent = `${parseFloat(e.target.value).toFixed(2)}×`;
 });
+generateBtn.addEventListener("click", synthesize);
 
-generateBtn.addEventListener("click", generateSpeech);
-retryLoadBtn.addEventListener("click", loadModel);
-clearCacheBtn.addEventListener("click", clearModelCache);
-
-player.addEventListener("timeupdate", () => {
-  if (!state.lastAudio || !player.duration) return;
-  drawPlayhead(player.currentTime / player.duration);
+deleteCacheBtn.addEventListener("click", async () => {
+  if ("caches" in window) {
+    await caches.delete(CACHE_NAME);
+    cacheSizeLabel.textContent = "Local Storage: Uncached";
+    location.reload();
+  }
 });
-player.addEventListener("ended", () => { if (state.lastAudio) drawWaveform(state.lastAudio); });
+clearHistoryBtn.addEventListener("click", clearAllHistory);
 
-window.addEventListener("resize", () => { if (state.lastAudio) drawWaveform(state.lastAudio); });
-
-// =========================================================================
 // Boot
-// =========================================================================
-(async function init() {
-  updateCharCount();
-  await refreshCacheBadge();
-  await loadModel();
-})();
+loadHistory();
+loadEngine();
 </script>
 
 </body>
