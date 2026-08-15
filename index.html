@@ -44,8 +44,8 @@
   /* --- Top Right Screen Clock (Clean text only) --- */
   .screen-clock {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 24px;
+    right: 32px;
     font-family: var(--font-mono);
     font-size: 13px;
     font-weight: 500;
@@ -171,14 +171,6 @@
     display: flex;
     align-items: center;
     gap: 6px;
-  }
-
-  @media (max-width: 480px) {
-      .stats-badges {
-        display: flex;
-        align-items: end;
-        flex-direction: column;
-      }
   }
 
   .stat-pill {
@@ -409,20 +401,91 @@
   .btn-generate:hover:not(:disabled) { background: var(--accent-hover); }
   .btn-generate:disabled { opacity: 0.45; cursor: not-allowed; }
 
-  .audio-output {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border-light);
-    display: none;
+  /* --- Right Column Layout --- */
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
   }
-  .audio-output.show { display: block; }
-  .audio-output audio { width: 100%; height: 34px; }
 
-  /* --- Right Column Layout: History --- */
+  /* Audio Output Card (Hidden initially) */
+  .audio-card {
+    display: none;
+    padding: 16px;
+  }
+  .audio-card.show {
+    display: block;
+  }
+  
+  .custom-audio-player {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .play-pause-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .play-pause-btn:hover { background: var(--accent-hover); }
+  .play-pause-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+  .audio-timeline-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .audio-time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5px;
+    font-family: var(--font-mono);
+    color: var(--text-faint);
+  }
+
+  .audio-timeline {
+    width: 100%;
+    height: 6px;
+    background: var(--border-light);
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .audio-progress {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 0%;
+    background: var(--amber);
+    border-radius: 10px;
+    pointer-events: none;
+  }
+
+  .audio-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .audio-actions .btn-icon { background: var(--border-light); padding: 8px; border-radius: 50%;}
+
+  /* History Card */
   .history-card {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    flex: 1;
+    min-height: 0; /* Important for flex child scrolling */
   }
 
   .history-header-info {
@@ -526,11 +589,11 @@
   /* --- Normal Document Flow Footer --- */
   .screen-footer {
     width: 100%;
-    max-width: 1920px;
+    max-width: 1160px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 20px 0;
     font-size: 12.5px;
     color: var(--text-muted);
   }
@@ -568,7 +631,7 @@
       gap: 12px;
     }
 
-    .left-col {
+    .left-col, .right-col {
       gap: 12px;
     }
 
@@ -619,7 +682,7 @@
         <div class="brand-group">
           <div class="brand-logo-wrap">
             <!-- Replace the src below with your base64 string or local image path -->
-            <img id="brand-logo" class="brand-logo-img" src="data:image/png;base64,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" alt="Kitten TTS Logo" />
+            <img id="brand-logo" class="brand-logo-img" src="data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M22 68C17 62 14 53 18 45C21 38 28 40 31 46C34 52 35 59 34 66' stroke='%2311141a' stroke-width='4.5' stroke-linecap='round'/><ellipse cx='20' cy='49' rx='2' ry='2.5' fill='%2311141a'/><ellipse cx='24' cy='46' rx='2' ry='2.5' fill='%2311141a'/><ellipse cx='28' cy='49' rx='2' ry='2.5' fill='%2311141a'/><path d='M22 55C22 53 26 53 26 55C26 57 22 57 22 55Z' fill='%2311141a'/><path d='M36 41C34 32 37 17 44 14C50 20 54 26 59 26C65 26 70 19 76 14C83 18 85 32 83 41C90 49 89 69 77 78C68 84 49 84 41 78C30 69 30 50 36 41Z' fill='%23ffffff' stroke='%2311141a' stroke-width='4.5' stroke-linejoin='round' stroke-linecap='round'/><path d='M42 22C41 26 43 31 46 32' stroke='%2311141a' stroke-width='4' stroke-linecap='round'/><path d='M78 22C79 26 77 31 74 32' stroke='%2311141a' stroke-width='4' stroke-linecap='round'/><path d='M46 39C43 33 37 36 39 42C40 46 46 51 46 51C46 51 52 46 53 42C55 36 49 33 46 39Z' fill='%2311141a'/><circle cx='43' cy='38' r='1.5' fill='%23ffffff'/><path d='M68 44C65 38 59 41 61 47C62 51 68 56 68 56C68 56 74 51 75 47C77 41 71 38 68 44Z' fill='%2311141a'/><circle cx='65' cy='43' r='1.5' fill='%23ffffff'/><path d='M54 52C54 53 56 55 57 55C58 55 60 53 60 52' fill='%2311141a'/><path d='M51 57C53 60 57 60 57 57C57 60 61 60 63 57' stroke='%2311141a' stroke-width='4' stroke-linecap='round'/><path d='M34 50L44 52' stroke='%2311141a' stroke-width='3.5' stroke-linecap='round'/><path d='M34 57L44 57' stroke='%2311141a' stroke-width='3.5' stroke-linecap='round'/><path d='M69 57L79 57' stroke='%2311141a' stroke-width='3.5' stroke-linecap='round'/><path d='M69 62L78 65' stroke='%2311141a' stroke-width='3.5' stroke-linecap='round'/><path d='M56 79C56 75 62 74 70 75C78 76 80 82 78 88C74 91 60 91 56 86C55 83 56 81 56 79Z' fill='%23ffffff' stroke='%2311141a' stroke-width='4.5' stroke-linecap='round'/><path d='M64 87V83' stroke='%2311141a' stroke-width='4' stroke-linecap='round'/></svg>" alt="Kitten TTS Logo" />
           </div>
           <div class="brand-meta">
             <h1>Kitten TTS Studio</h1>
@@ -628,6 +691,7 @@
         </div>
         
         <div class="identity-right">
+          <div class="identity-divider"></div>
           <div class="stats-badges">
             <span class="stat-pill">24 kHz</span>
             <span class="stat-pill">WASM</span>
@@ -660,7 +724,7 @@
         </div>
 
         <div class="model-footer">
-          <span class="model-size-label" id="cache-size-label">Storage: Uncached</span>
+          <span class="model-size-label" id="cache-size-label">Local Storage: Uncached</span>
           <button class="btn-delete-cache" id="delete-cache-btn">Delete Cached Model</button>
         </div>
       </div>
@@ -706,36 +770,64 @@
         </div>
 
         <button class="btn-generate" id="generate-btn" disabled>Generate Speech</button>
-
-        <div class="audio-output" id="audio-output">
-          <audio id="player" controls></audio>
-        </div>
       </div>
     </div>
 
     <!-- RIGHT COLUMN -->
-    <div class="card history-card">
-      <div class="card-header">
-        <h2 class="card-title">Generation History</h2>
-        <div class="history-header-info">
-          <span class="pill-count" id="history-count">0 items</span>
-          <button class="btn-clear-history" id="clear-history-btn">Clear All</button>
+    <div class="right-col">
+      <!-- Player Card (Hidden until needed) -->
+      <div class="card audio-card" id="audio-card">
+        <div class="custom-audio-player">
+          <button class="play-pause-btn" id="custom-play-btn">
+            <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+          
+          <div class="audio-timeline-wrap">
+            <div class="audio-time-row">
+              <span id="audio-current">0:00</span>
+              <span id="audio-duration">0:00</span>
+            </div>
+            <div class="audio-timeline" id="audio-timeline">
+              <div class="audio-progress" id="audio-progress"></div>
+            </div>
+          </div>
+
+          <div class="audio-actions">
+            <a class="btn-icon" id="custom-download-btn" title="Download">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+            </a>
+          </div>
+          <!-- Hidden native player to handle the actual logic -->
+          <audio id="player" style="display: none;"></audio>
         </div>
       </div>
 
-      <div class="history-list" id="history-list">
-        <div class="history-empty">No generations yet. Create your first audio on the left.</div>
+      <!-- History Card -->
+      <div class="card history-card">
+        <div class="card-header">
+          <h2 class="card-title">Generation History</h2>
+          <div class="history-header-info">
+            <span class="pill-count" id="history-count">0 items</span>
+            <button class="btn-clear-history" id="clear-history-btn">Clear All</button>
+          </div>
+        </div>
+
+        <div class="history-list" id="history-list">
+          <div class="history-empty">No generations yet. Create your first audio on the left.</div>
+        </div>
       </div>
     </div>
+
   </div>
 </main>
 
 <footer class="screen-footer">
   <div class="footer-left">
-    For web development and custom business automations &nbsp;<a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">contact on Instagram</a>
+    For web development and custom business automations, <a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">contact on Instagram</a>
   </div>
   <div class="footer-right">
-    <span>Follow on Instagram &nbsp;</span><a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">@talhaxcodes</a>
+    <a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">@talhaxcodes</a>
   </div>
 </footer>
 
@@ -832,8 +924,6 @@ const voiceSelect = el("voice-select");
 const speedSlider = el("speed-slider");
 const speedVal = el("speed-val");
 const generateBtn = el("generate-btn");
-const audioOutput = el("audio-output");
-const player = el("player");
 const dpCard = el("download-progress");
 const dpLabel = el("dp-label");
 const dpPct = el("dp-pct");
@@ -842,6 +932,19 @@ const historyList = el("history-list");
 const historyCount = el("history-count");
 const clearHistoryBtn = el("clear-history-btn");
 const liveClock = el("live-clock");
+
+// Custom Player Elements
+const audioCard = el("audio-card");
+const player = el("player");
+const playBtn = el("custom-play-btn");
+const iconPlay = el("icon-play");
+const iconPause = el("icon-pause");
+const audioTimeline = el("audio-timeline");
+const audioProgress = el("audio-progress");
+const audioCurrent = el("audio-current");
+const audioDuration = el("audio-duration");
+const customDownloadBtn = el("custom-download-btn");
+
 
 const state = {
   modelReady: false,
@@ -860,6 +963,63 @@ function updateLiveClock() {
 }
 setInterval(updateLiveClock, 1000);
 updateLiveClock();
+
+/* --- Custom Audio Player Logic --- */
+function formatTime(seconds) {
+  if (isNaN(seconds)) return "0:00";
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+playBtn.addEventListener('click', () => {
+  if (player.paused) {
+    player.play();
+  } else {
+    player.pause();
+  }
+});
+
+player.addEventListener('play', () => {
+  iconPlay.style.display = 'none';
+  iconPause.style.display = 'block';
+});
+
+player.addEventListener('pause', () => {
+  iconPlay.style.display = 'block';
+  iconPause.style.display = 'none';
+});
+
+player.addEventListener('timeupdate', () => {
+  audioCurrent.textContent = formatTime(player.currentTime);
+  if (player.duration) {
+    const percent = (player.currentTime / player.duration) * 100;
+    audioProgress.style.width = `${percent}%`;
+  }
+});
+
+player.addEventListener('loadedmetadata', () => {
+  audioDuration.textContent = formatTime(player.duration);
+  audioCurrent.textContent = "0:00";
+  audioProgress.style.width = "0%";
+});
+
+audioTimeline.addEventListener('click', (e) => {
+  if (!player.duration) return;
+  const rect = audioTimeline.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const percent = clickX / rect.width;
+  player.currentTime = percent * player.duration;
+});
+
+function loadAudioToPlayer(url, id) {
+    player.src = url;
+    customDownloadBtn.href = url;
+    customDownloadBtn.download = `kitten-${id}.wav`;
+    audioCard.classList.add("show");
+    player.play();
+}
+
 
 /* --- IndexedDB Storage Helper for History --- */
 const DB_NAME = "kitten_tts_history_db";
@@ -919,6 +1079,10 @@ async function clearAllHistory() {
   tx.objectStore("history").clear();
   state.history = [];
   renderHistory();
+  // Hide audio player if history is cleared
+  audioCard.classList.remove("show");
+  player.pause();
+  player.src = "";
 }
 
 function renderHistory() {
@@ -962,9 +1126,7 @@ function renderHistory() {
 
     if (hasAudio) {
       div.querySelector(".play-btn").addEventListener("click", () => {
-        player.src = audioUrl;
-        audioOutput.classList.add("show");
-        player.play();
+         loadAudioToPlayer(audioUrl, item.id);
       });
     }
 
@@ -1235,7 +1397,7 @@ async function loadEngine() {
     state.modelReady = true;
     statusDot.className = "dot ready";
     statusText.textContent = "Ready";
-    cacheSizeLabel.textContent = "Storage: Cached (~23.8 MB)";
+    cacheSizeLabel.textContent = "Local Storage: Cached (~23.8 MB)";
     generateBtn.disabled = false;
   } catch (err) {
     statusDot.className = "dot error";
@@ -1279,12 +1441,13 @@ async function synthesize() {
 
     const wavBlob = encodeWav(full, SAMPLE_RATE);
     const url = URL.createObjectURL(wavBlob);
-    player.src = url;
-    audioOutput.classList.add("show");
-    player.play();
+    
+    // Create new id for the history item and pass it to player
+    const newId = Date.now().toString();
+    loadAudioToPlayer(url, newId);
 
     saveHistoryItem({
-      id: Date.now().toString(),
+      id: newId,
       text,
       voice: voiceSelect.options[voiceSelect.selectedIndex].text.split("—")[0].trim(),
       speed: speed.toFixed(2),
