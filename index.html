@@ -36,49 +36,34 @@
     color: var(--text);
     font-family: var(--font);
     min-height: 100vh;
-    padding: 40px 32px 50px;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
+    flex-direction: column;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* --- Top Right Screen Clock --- */
+  /* --- Top Right Screen Clock (Clean text only) --- */
   .screen-clock {
-    position: fixed;
+    position: absolute;
     top: 20px;
-    right: 28px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(6px);
-    border: 1px solid var(--border);
-    padding: 5px 12px;
-    border-radius: 100px;
+    right: 20px;
     font-family: var(--font-mono);
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
     z-index: 100;
   }
 
-  .live-indicator {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    animation: livePulse 2s infinite;
+  /* --- Main Layout Wrapper --- */
+  .main-content {
+    flex: 1;
+    display: flex;
+    align-items: center; /* Vertically centers the grid on large screens */
+    justify-content: center;
+    width: 100%;
+    padding: 60px 32px 40px;
   }
 
-  @keyframes livePulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.35; transform: scale(0.85); }
-  }
-
-  /* --- Main Container --- */
+  /* --- 2-Column Grid --- */
   .container {
     width: 100%;
     max-width: 1160px;
@@ -116,14 +101,15 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+    height: 100%;
   }
 
-  /* 1. Identity Card */
+  /* 1. Identity Card (Combined & Compact) */
   .identity-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 14px 18px;
+    padding: 12px 18px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -154,6 +140,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    padding: 2px;
   }
 
   .brand-meta h1 {
@@ -168,10 +155,30 @@
     color: var(--text-muted);
   }
 
+  .identity-right {
+    display: flex;
+    align-items: center;
+  }
+
+  .identity-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+    margin: 0 16px;
+  }
+
   .stats-badges {
     display: flex;
     align-items: center;
     gap: 6px;
+  }
+
+  @media (max-width: 480px) {
+      .stats-badges {
+        display: flex;
+        align-items: end;
+        flex-direction: column;
+      }
   }
 
   .stat-pill {
@@ -297,15 +304,17 @@
 
   /* 3. Synthesizer Card */
   .synth-card {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    justify-content: space-between;
   }
 
   .field {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    margin-bottom: 12px;
   }
   
   .field-label {
@@ -345,6 +354,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 14px;
+    margin-bottom: 14px;
   }
 
   select.input-select {
@@ -400,6 +410,7 @@
   .btn-generate:disabled { opacity: 0.45; cursor: not-allowed; }
 
   .audio-output {
+    margin-top: 12px;
     padding-top: 12px;
     border-top: 1px solid var(--border-light);
     display: none;
@@ -512,24 +523,16 @@
   .btn-icon.delete:hover { color: var(--red); background: #fee2e2; }
   .btn-icon svg { width: 14px; height: 14px; }
 
-  /* --- Fixed Screen Corner Footer --- */
+  /* --- Normal Document Flow Footer --- */
   .screen-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    width: 100%;
+    max-width: 1920px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 32px;
-    font-size: 12px;
+    padding: 20px;
+    font-size: 12.5px;
     color: var(--text-muted);
-    pointer-events: none;
-    z-index: 100;
-  }
-
-  .screen-footer * {
-    pointer-events: auto;
   }
 
   .screen-footer a {
@@ -545,17 +548,19 @@
   }
 
   /* --- Compact Mobile Sizing --- */
-  @media (max-width: 900px) {
+  @media (max-width: 860px) {
     body {
-      padding: 56px 12px 80px;
-      align-items: flex-start;
+      /* Significantly reduced padding for mobile */
+      padding: 0;
     }
     
     .screen-clock {
-      top: 12px;
-      right: 12px;
-      padding: 4px 10px;
-      font-size: 11px;
+      display: none;
+    }
+
+    .main-content {
+      padding: 16px 14px 0; /* Tight mobile wrapper */
+      align-items: flex-start; /* Stops vertical centering from squashing content */
     }
 
     .container {
@@ -563,155 +568,174 @@
       gap: 12px;
     }
 
+    .left-col {
+      gap: 12px;
+    }
+
+    .identity-divider {
+      margin: 0 10px;
+    }
+
+    /* Tighter padding on all cards */
     .card, .identity-card, .model-card {
       padding: 14px;
       border-radius: 12px;
     }
 
+    textarea.input-text {
+      height: 90px;
+      padding: 10px 12px;
+    }
+
     .history-card {
-      min-height: 380px;
+      min-height: 380px; 
     }
 
     .screen-footer {
-      position: static;
-      padding: 16px 4px 4px;
-      flex-direction: column;
-      gap: 8px;
-      align-items: flex-start;
-      pointer-events: auto;
+      padding: 20px 16px;
+      font-size: 11.5px;
+      justify-content: center;
+      text-align: center;
+    }
+
+    /* Hide @talhaxcodes text on right side for mobile */
+    .footer-right {
+      display: none;
     }
   }
 </style>
 </head>
 <body>
 
-<!-- Fixed Screen Top Right Live Clock -->
-<div class="screen-clock">
-  <span class="live-indicator"></span>
-  <span id="live-clock">--:--:--</span>
-</div>
+<!-- Clean Time Clock (Desktop Only) -->
+<div id="live-clock" class="screen-clock">--:--:--</div>
 
-<div class="container">
-  <!-- LEFT COLUMN -->
-  <div class="left-col">
-    <!-- Top Identity / Summary Card -->
-    <div class="identity-card">
-      <div class="brand-group">
-        <div class="brand-logo-wrap">
-          <img id="brand-logo" class="brand-logo-img" src="data:image/png;base64,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" alt="Kitten TTS Logo" />
+<main class="main-content">
+  <div class="container">
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+      <!-- Top Identity / Summary Card -->
+      <div class="identity-card">
+        <div class="brand-group">
+          <div class="brand-logo-wrap">
+            <!-- Replace the src below with your base64 string or local image path -->
+            <img id="brand-logo" class="brand-logo-img" src="data:image/png;base64,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" alt="Kitten TTS Logo" />
+          </div>
+          <div class="brand-meta">
+            <h1>Kitten TTS Studio</h1>
+            <p>Local On-Device Voice Synthesis</p>
+          </div>
         </div>
-        <div class="brand-meta">
-          <h1>Kitten TTS Studio</h1>
-          <p>Local On-Device Voice Synthesis</p>
-        </div>
-      </div>
-      <div class="stats-badges">
-        <span class="stat-pill">24 kHz</span>
-        <span class="stat-pill">WASM</span>
-      </div>
-    </div>
-
-    <!-- Engine & Model Cache Card -->
-    <div class="model-card">
-      <div class="model-header">
-        <div>
-          <div class="model-info-title">Model Engine</div>
-          <div class="model-info-sub">kitten-tts-nano-0.1 (INT8)</div>
-        </div>
-        <div class="status-badge">
-          <div class="dot" id="status-dot"></div>
-          <span id="status-text">Checking cache…</span>
+        
+        <div class="identity-right">
+          <div class="stats-badges">
+            <span class="stat-pill">24 kHz</span>
+            <span class="stat-pill">WASM</span>
+          </div>
         </div>
       </div>
 
-      <!-- Live Download Monitor -->
-      <div class="download-progress" id="download-progress">
-        <div class="progress-info">
-          <span id="dp-label">Downloading model (23.8 MB)…</span>
-          <span id="dp-pct">0%</span>
+      <!-- Engine & Model Cache Card -->
+      <div class="model-card">
+        <div class="model-header">
+          <div>
+            <div class="model-info-title">Model Engine</div>
+            <div class="model-info-sub">kitten-tts-nano-0.1 (INT8)</div>
+          </div>
+          <div class="status-badge">
+            <div class="dot" id="status-dot"></div>
+            <span id="status-text">Checking cache…</span>
+          </div>
         </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="dp-fill"></div>
+
+        <!-- Live Download Monitor -->
+        <div class="download-progress" id="download-progress">
+          <div class="progress-info">
+            <span id="dp-label">Downloading model (23.8 MB)…</span>
+            <span id="dp-pct">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="dp-fill"></div>
+          </div>
+        </div>
+
+        <div class="model-footer">
+          <span class="model-size-label" id="cache-size-label">Storage: Uncached</span>
+          <button class="btn-delete-cache" id="delete-cache-btn">Delete Cached Model</button>
         </div>
       </div>
 
-      <div class="model-footer">
-        <span class="model-size-label" id="cache-size-label">Local Storage: Uncached</span>
-        <button class="btn-delete-cache" id="delete-cache-btn">Delete Cached Model</button>
-      </div>
-    </div>
-
-    <!-- Synthesizer Card -->
-    <div class="card synth-card">
-      <div class="card-header" style="margin-bottom: 0;">
-        <h2 class="card-title">Synthesize Speech</h2>
-      </div>
-
-      <div class="field">
-        <div class="field-label">
-          <span>Input Prompt</span>
-          <span class="counter" id="char-counter">0 / 2000</span>
-        </div>
-        <textarea class="input-text" id="text-input" maxlength="2000" placeholder="Enter text to synthesize...">Welcome to Kitten TTS. This voice model runs entirely inside your browser using quantized WebAssembly.</textarea>
-      </div>
-
-      <div class="controls-row">
-        <div class="field">
-          <div class="field-label"><span>Voice Persona</span></div>
-          <select class="input-select" id="voice-select">
-            <option value="expr-voice-2-m">Voice 2 — Male</option>
-            <option value="expr-voice-2-f">Voice 2 — Female</option>
-            <option value="expr-voice-3-m">Voice 3 — Male</option>
-            <option value="expr-voice-3-f">Voice 3 — Female</option>
-            <option value="expr-voice-4-m">Voice 4 — Male</option>
-            <option value="expr-voice-4-f">Voice 4 — Female</option>
-            <option value="expr-voice-5-m" selected>Voice 5 — Male</option>
-            <option value="expr-voice-5-f">Voice 5 — Female</option>
-          </select>
+      <!-- Synthesizer Card -->
+      <div class="card synth-card">
+        <div class="card-header" style="margin-bottom: 0;">
+          <h2 class="card-title">Synthesize Speech</h2>
         </div>
 
         <div class="field">
           <div class="field-label">
-            <span>Speed</span>
-            <span class="counter" id="speed-val">1.00×</span>
+            <span>Input Prompt</span>
+            <span class="counter" id="char-counter">0 / 2000</span>
           </div>
-          <div class="slider-container">
-            <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.05" value="1.0" />
+          <textarea class="input-text" id="text-input" maxlength="2000" placeholder="Enter text to synthesize...">Welcome to Kitten TTS. This voice model runs entirely inside your browser using quantized WebAssembly.</textarea>
+        </div>
+
+        <div class="controls-row">
+          <div class="field">
+            <div class="field-label"><span>Voice Persona</span></div>
+            <select class="input-select" id="voice-select">
+              <option value="expr-voice-2-m">Voice 2 — Male</option>
+              <option value="expr-voice-2-f">Voice 2 — Female</option>
+              <option value="expr-voice-3-m">Voice 3 — Male</option>
+              <option value="expr-voice-3-f">Voice 3 — Female</option>
+              <option value="expr-voice-4-m">Voice 4 — Male</option>
+              <option value="expr-voice-4-f">Voice 4 — Female</option>
+              <option value="expr-voice-5-m" selected>Voice 5 — Male</option>
+              <option value="expr-voice-5-f">Voice 5 — Female</option>
+            </select>
           </div>
+
+          <div class="field">
+            <div class="field-label">
+              <span>Speed</span>
+              <span class="counter" id="speed-val">1.00×</span>
+            </div>
+            <div class="slider-container">
+              <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.05" value="1.0" />
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-generate" id="generate-btn" disabled>Generate Speech</button>
+
+        <div class="audio-output" id="audio-output">
+          <audio id="player" controls></audio>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="card history-card">
+      <div class="card-header">
+        <h2 class="card-title">Generation History</h2>
+        <div class="history-header-info">
+          <span class="pill-count" id="history-count">0 items</span>
+          <button class="btn-clear-history" id="clear-history-btn">Clear All</button>
         </div>
       </div>
 
-      <button class="btn-generate" id="generate-btn" disabled>Generate Speech</button>
-
-      <div class="audio-output" id="audio-output">
-        <audio id="player" controls></audio>
+      <div class="history-list" id="history-list">
+        <div class="history-empty">No generations yet. Create your first audio on the left.</div>
       </div>
     </div>
   </div>
+</main>
 
-  <!-- RIGHT COLUMN -->
-  <div class="card history-card">
-    <div class="card-header">
-      <h2 class="card-title">Generation History</h2>
-      <div class="history-header-info">
-        <span class="pill-count" id="history-count">0 items</span>
-        <button class="btn-clear-history" id="clear-history-btn">Clear All</button>
-      </div>
-    </div>
-
-    <div class="history-list" id="history-list">
-      <div class="history-empty">No generations yet. Create your first audio on the left.</div>
-    </div>
-  </div>
-</div>
-
-<!-- Screen Corners Static Footer -->
 <footer class="screen-footer">
-  <div>
-    For web development and custom business automations, <a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">contact on Instagram</a>
+  <div class="footer-left">
+    For web development and custom business automations &nbsp;<a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">contact on Instagram</a>
   </div>
-  <div>
-    <a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">@talhaxcodes</a>
+  <div class="footer-right">
+    <span>Follow on Instagram &nbsp;</span><a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">@talhaxcodes</a>
   </div>
 </footer>
 
@@ -1211,7 +1235,7 @@ async function loadEngine() {
     state.modelReady = true;
     statusDot.className = "dot ready";
     statusText.textContent = "Ready";
-    cacheSizeLabel.textContent = "Local Storage: Cached (~23.8 MB)";
+    cacheSizeLabel.textContent = "Storage: Cached (~23.8 MB)";
     generateBtn.disabled = false;
   } catch (err) {
     statusDot.className = "dot error";
