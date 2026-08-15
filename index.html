@@ -6,7 +6,7 @@
 <title>Kitten TTS · Studio Dashboard</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
@@ -57,7 +57,7 @@
   .main-content {
     flex: 1;
     display: flex;
-    align-items: center; /* Vertically centers the grid on large screens */
+    align-items: center;
     justify-content: center;
     width: 100%;
     padding: 60px 32px 40px;
@@ -409,83 +409,99 @@
     height: 100%;
   }
 
-  /* Audio Output Card (Hidden initially) */
+  /* --- Streamlined Waveform Audio Player Card --- */
   .audio-card {
     display: none;
-    padding: 16px;
+    padding: 12px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    animation: fadeIn 0.25s ease-out;
   }
   .audio-card.show {
     display: block;
   }
-  
-  .custom-audio-player {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  .play-pause-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: white;
+  .custom-voice-player {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+  }
+
+  .voice-play-btn {
+    background: transparent;
     border: none;
+    cursor: pointer;
+    color: var(--text);
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
     flex-shrink: 0;
-    transition: background 0.15s;
+    transition: transform 0.1s ease, color 0.15s ease;
   }
-  .play-pause-btn:hover { background: var(--accent-hover); }
-  .play-pause-btn svg { width: 18px; height: 18px; fill: currentColor; }
+  .voice-play-btn:hover { color: var(--accent-hover); }
+  .voice-play-btn:active { transform: scale(0.92); }
+  .voice-play-btn svg { width: 20px; height: 20px; fill: currentColor; }
 
-  .audio-timeline-wrap {
+  .waveform-container {
     flex: 1;
+    height: 36px;
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .audio-time-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10.5px;
-    font-family: var(--font-mono);
-    color: var(--text-faint);
-  }
-
-  .audio-timeline {
-    width: 100%;
-    height: 6px;
-    background: var(--border-light);
-    border-radius: 10px;
+    align-items: center;
     position: relative;
     cursor: pointer;
   }
-  
-  .audio-progress {
-    position: absolute;
-    top: 0; left: 0; bottom: 0;
-    width: 0%;
-    background: var(--amber);
-    border-radius: 10px;
-    pointer-events: none;
+
+  #waveform-canvas {
+    width: 100%;
+    height: 36px;
+    display: block;
   }
 
-  .audio-actions {
+  .voice-player-end {
     display: flex;
-    gap: 6px;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
   }
-  .audio-actions .btn-icon { background: var(--border-light); padding: 8px; border-radius: 50%;}
+
+  .voice-duration {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-muted);
+    min-width: 32px;
+    text-align: right;
+  }
+
+  .voice-download {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+  .voice-download:hover { color: var(--text); background: var(--border-light); }
+  .voice-download svg { width: 15px; height: 15px; }
 
   /* History Card */
   .history-card {
     display: flex;
     flex-direction: column;
     flex: 1;
-    min-height: 0; /* Important for flex child scrolling */
+    min-height: 0;
   }
 
   .history-header-info {
@@ -613,7 +629,6 @@
   /* --- Compact Mobile Sizing --- */
   @media (max-width: 860px) {
     body {
-      /* Significantly reduced padding for mobile */
       padding: 0;
     }
     
@@ -622,8 +637,8 @@
     }
 
     .main-content {
-      padding: 16px 14px 0; /* Tight mobile wrapper */
-      align-items: flex-start; /* Stops vertical centering from squashing content */
+      padding: 16px 14px 0;
+      align-items: flex-start;
     }
 
     .container {
@@ -639,8 +654,7 @@
       margin: 0 10px;
     }
 
-    /* Tighter padding on all cards */
-    .card, .identity-card, .model-card {
+    .card, .identity-card, .model-card, .audio-card {
       padding: 14px;
       border-radius: 12px;
     }
@@ -661,7 +675,6 @@
       text-align: center;
     }
 
-    /* Hide @talhaxcodes text on right side for mobile */
     .footer-right {
       display: none;
     }
@@ -681,7 +694,6 @@
       <div class="identity-card">
         <div class="brand-group">
           <div class="brand-logo-wrap">
-            <!-- Replace the src below with your base64 string or local image path -->
             <img id="brand-logo" class="brand-logo-img" src="data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M22 68C17 62 14 53 18 45C21 38 28 40 31 46C34 52 35 59 34 66' stroke='%2311141a' stroke-width='4.5' stroke-linecap='round'/><ellipse cx='20' cy='49' rx='2' ry='2.5' fill='%2311141a'/><ellipse cx='24' cy='46' rx='2' ry='2.5' fill='%2311141a'/><ellipse cx='28' cy='49' rx='2' ry='2.5' fill='%2311141a'/><path d='M22 55C22 53 26 53 26 55C26 57 22 57 22 55Z' fill='%2311141a'/><path d='M36 41C34 32 37 17 44 14C50 20 54 26 59 26C65 26 70 19 76 14C83 18 85 32 83 41C90 49 89 69 77 78C68 84 49 84 41 78C30 69 30 50 36 41Z' fill='%23ffffff' stroke='%2311141a' stroke-width='4.5' stroke-linejoin='round' stroke-linecap='round'/><path d='M42 22C41 26 43 31 46 32' stroke='%2311141a' stroke-width='4' stroke-linecap='round'/><path d='M78 22C79 26 77 31 74 32' stroke='%2311141a' stroke-width='4' stroke-linecap='round'/><path d='M46 39C43 33 37 36 39 42C40 46 46 51 46 51C46 51 52 46 53 42C55 36 49 33 46 39Z' fill='%2311141a'/><circle cx='43' cy='38' r='1.5' fill='%23ffffff'/><path d='M68 44C65 38 59 41 61 47C62 51 68 56 68 56C68 56 74 51 75 47C77 41 71 38 68 44Z' fill='%2311141a'/><circle cx='65' cy='43' r='1.5' fill='%23ffffff'/><path d='M54 52C54 53 56 55 57 55C58 55 60 53 60 52' fill='%2311141a'/><path d='M51 57C53 60 57 60 57 57C57 60 61 60 63 57' stroke='%2311141a' stroke-width='4' stroke-linecap='round'/><path d='M34 50L44 52' stroke='%2311141a' stroke-width='3.5' stroke-linecap='round'/><path d='M34 57L44 57' stroke='%2311141a' stroke-width='3.5' stroke-linecap='round'/><path d='M69 57L79 57' stroke='%2311141a' stroke-width='3.5' stroke-linecap='round'/><path d='M69 62L78 65' stroke='%2311141a' stroke-width='3.5' stroke-linecap='round'/><path d='M56 79C56 75 62 74 70 75C78 76 80 82 78 88C74 91 60 91 56 86C55 83 56 81 56 79Z' fill='%23ffffff' stroke='%2311141a' stroke-width='4.5' stroke-linecap='round'/><path d='M64 87V83' stroke='%2311141a' stroke-width='4' stroke-linecap='round'/></svg>" alt="Kitten TTS Logo" />
           </div>
           <div class="brand-meta">
@@ -724,7 +736,7 @@
         </div>
 
         <div class="model-footer">
-          <span class="model-size-label" id="cache-size-label">Local Storage: Uncached</span>
+          <span class="model-size-label" id="cache-size-label">Storage: Uncached</span>
           <button class="btn-delete-cache" id="delete-cache-btn">Delete Cached Model</button>
         </div>
       </div>
@@ -775,30 +787,24 @@
 
     <!-- RIGHT COLUMN -->
     <div class="right-col">
-      <!-- Player Card (Hidden until needed) -->
+      <!-- Minimalist Voice-Message Waveform Player Card -->
       <div class="card audio-card" id="audio-card">
-        <div class="custom-audio-player">
-          <button class="play-pause-btn" id="custom-play-btn">
-            <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            <svg id="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        <div class="custom-voice-player">
+          <button class="voice-play-btn" id="custom-play-btn" aria-label="Play/Pause">
+            <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86a1 1 0 0 0-1.5.86z"/></svg>
+            <svg id="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 5a1 1 0 0 1 1 1v12a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1zm12 0a1 1 0 0 1 1 1v12a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1z"/></svg>
           </button>
           
-          <div class="audio-timeline-wrap">
-            <div class="audio-time-row">
-              <span id="audio-current">0:00</span>
-              <span id="audio-duration">0:00</span>
-            </div>
-            <div class="audio-timeline" id="audio-timeline">
-              <div class="audio-progress" id="audio-progress"></div>
-            </div>
+          <div class="waveform-container" id="waveform-wrap">
+            <canvas id="waveform-canvas"></canvas>
           </div>
 
-          <div class="audio-actions">
-            <a class="btn-icon" id="custom-download-btn" title="Download">
+          <div class="voice-player-end">
+            <span class="voice-duration" id="audio-time">0:00</span>
+            <a class="voice-download" id="custom-download-btn" title="Download Audio">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
             </a>
           </div>
-          <!-- Hidden native player to handle the actual logic -->
           <audio id="player" style="display: none;"></audio>
         </div>
       </div>
@@ -824,10 +830,10 @@
 
 <footer class="screen-footer">
   <div class="footer-left">
-    For web development and custom business automations, <a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">contact on Instagram</a>
+    For web development and custom business automations &nbsp;<a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">contact on Instagram</a>
   </div>
   <div class="footer-right">
-    <a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">@talhaxcodes</a>
+    <span>Follow on Instagram &nbsp;</span><a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">@talhaxcodes</a>
   </div>
 </footer>
 
@@ -933,18 +939,19 @@ const historyCount = el("history-count");
 const clearHistoryBtn = el("clear-history-btn");
 const liveClock = el("live-clock");
 
-// Custom Player Elements
+// Custom Waveform Player Elements
 const audioCard = el("audio-card");
 const player = el("player");
 const playBtn = el("custom-play-btn");
 const iconPlay = el("icon-play");
 const iconPause = el("icon-pause");
-const audioTimeline = el("audio-timeline");
-const audioProgress = el("audio-progress");
-const audioCurrent = el("audio-current");
-const audioDuration = el("audio-duration");
+const waveformWrap = el("waveform-wrap");
+const waveformCanvas = el("waveform-canvas");
+const audioTime = el("audio-time");
 const customDownloadBtn = el("custom-download-btn");
 
+let currentPeaks = [];
+let animFrameId = null;
 
 const state = {
   modelReady: false,
@@ -964,12 +971,84 @@ function updateLiveClock() {
 setInterval(updateLiveClock, 1000);
 updateLiveClock();
 
-/* --- Custom Audio Player Logic --- */
+/* --- Smooth Waveform Rendering & Player Logic --- */
 function formatTime(seconds) {
-  if (isNaN(seconds)) return "0:00";
+  if (isNaN(seconds) || !isFinite(seconds)) return "0:00";
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function computePeaks(samples, numBars = 48) {
+  if (!samples || samples.length === 0) {
+    return Array.from({ length: numBars }, (_, i) => Math.abs(Math.sin(i * 0.28)) * 0.6 + 0.2);
+  }
+  const step = Math.floor(samples.length / numBars);
+  const peaks = [];
+  for (let i = 0; i < numBars; i++) {
+    let sum = 0;
+    const start = i * step;
+    const end = Math.min(start + step, samples.length);
+    for (let j = start; j < end; j++) {
+      sum += Math.abs(samples[j]);
+    }
+    const avg = sum / (end - start || 1);
+    peaks.push(Math.max(0.12, Math.min(1.0, avg * 3.8)));
+  }
+  return peaks;
+}
+
+function drawWaveform() {
+  if (!waveformCanvas) return;
+  const ctx = waveformCanvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const w = waveformCanvas.clientWidth || 280;
+  const h = waveformCanvas.clientHeight || 36;
+  
+  if (waveformCanvas.width !== Math.round(w * dpr) || waveformCanvas.height !== Math.round(h * dpr)) {
+    waveformCanvas.width = Math.round(w * dpr);
+    waveformCanvas.height = Math.round(h * dpr);
+  }
+
+  ctx.save();
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const numBars = currentPeaks.length || 48;
+  const barWidth = 3;
+  const gap = Math.max(1.5, (w - (numBars * barWidth)) / (numBars - 1));
+
+  const duration = player.duration || 1;
+  const progress = Math.max(0, Math.min(1, player.currentTime / duration));
+  const currentX = progress * w;
+
+  for (let i = 0; i < numBars; i++) {
+    const x = i * (barWidth + gap);
+    const val = currentPeaks[i] !== undefined ? currentPeaks[i] : 0.3;
+    const barHeight = Math.max(4, val * (h - 6));
+    const y = (h - barHeight) / 2;
+
+    const isPlayed = (x + barWidth / 2) <= currentX;
+    ctx.fillStyle = isPlayed ? '#0f172a' : '#cbd5e1';
+
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(x, y, barWidth, barHeight, 2);
+    } else {
+      ctx.rect(x, y, barWidth, barHeight);
+    }
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function renderLoop() {
+  drawWaveform();
+  audioTime.textContent = formatTime(player.duration ? player.duration - player.currentTime : 0);
+  if (!player.paused && !player.ended) {
+    animFrameId = requestAnimationFrame(renderLoop);
+  }
 }
 
 playBtn.addEventListener('click', () => {
@@ -983,43 +1062,66 @@ playBtn.addEventListener('click', () => {
 player.addEventListener('play', () => {
   iconPlay.style.display = 'none';
   iconPause.style.display = 'block';
+  cancelAnimationFrame(animFrameId);
+  animFrameId = requestAnimationFrame(renderLoop);
 });
 
 player.addEventListener('pause', () => {
   iconPlay.style.display = 'block';
   iconPause.style.display = 'none';
+  cancelAnimationFrame(animFrameId);
+  drawWaveform();
 });
 
-player.addEventListener('timeupdate', () => {
-  audioCurrent.textContent = formatTime(player.currentTime);
-  if (player.duration) {
-    const percent = (player.currentTime / player.duration) * 100;
-    audioProgress.style.width = `${percent}%`;
-  }
+player.addEventListener('ended', () => {
+  iconPlay.style.display = 'block';
+  iconPause.style.display = 'none';
+  cancelAnimationFrame(animFrameId);
+  player.currentTime = 0;
+  drawWaveform();
+  audioTime.textContent = formatTime(player.duration || 0);
 });
 
 player.addEventListener('loadedmetadata', () => {
-  audioDuration.textContent = formatTime(player.duration);
-  audioCurrent.textContent = "0:00";
-  audioProgress.style.width = "0%";
+  audioTime.textContent = formatTime(player.duration || 0);
+  drawWaveform();
 });
 
-audioTimeline.addEventListener('click', (e) => {
+waveformWrap.addEventListener('click', (e) => {
   if (!player.duration) return;
-  const rect = audioTimeline.getBoundingClientRect();
+  const rect = waveformWrap.getBoundingClientRect();
   const clickX = e.clientX - rect.left;
-  const percent = clickX / rect.width;
-  player.currentTime = percent * player.duration;
+  const pct = Math.max(0, Math.min(1, clickX / rect.width));
+  player.currentTime = pct * player.duration;
+  drawWaveform();
+  audioTime.textContent = formatTime(player.duration - player.currentTime);
 });
 
-function loadAudioToPlayer(url, id) {
-    player.src = url;
-    customDownloadBtn.href = url;
-    customDownloadBtn.download = `kitten-${id}.wav`;
-    audioCard.classList.add("show");
-    player.play();
-}
+window.addEventListener('resize', drawWaveform);
 
+async function loadAudioToPlayer(url, id, rawSamples = null) {
+  if (rawSamples) {
+    currentPeaks = computePeaks(rawSamples, 48);
+  } else {
+    // Fallback: Compute dynamic waveform peaks from audio buffer
+    try {
+      const response = await fetch(url);
+      const arrayBuf = await response.arrayBuffer();
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const decoded = await audioCtx.decodeAudioData(arrayBuf);
+      currentPeaks = computePeaks(decoded.getChannelData(0), 48);
+    } catch {
+      currentPeaks = computePeaks(null, 48);
+    }
+  }
+
+  player.src = url;
+  customDownloadBtn.href = url;
+  customDownloadBtn.download = `kitten-${id}.wav`;
+  audioCard.classList.add("show");
+  drawWaveform();
+  player.play();
+}
 
 /* --- IndexedDB Storage Helper for History --- */
 const DB_NAME = "kitten_tts_history_db";
@@ -1079,7 +1181,6 @@ async function clearAllHistory() {
   tx.objectStore("history").clear();
   state.history = [];
   renderHistory();
-  // Hide audio player if history is cleared
   audioCard.classList.remove("show");
   player.pause();
   player.src = "";
@@ -1126,7 +1227,7 @@ function renderHistory() {
 
     if (hasAudio) {
       div.querySelector(".play-btn").addEventListener("click", () => {
-         loadAudioToPlayer(audioUrl, item.id);
+        loadAudioToPlayer(audioUrl, item.id, null);
       });
     }
 
@@ -1397,7 +1498,7 @@ async function loadEngine() {
     state.modelReady = true;
     statusDot.className = "dot ready";
     statusText.textContent = "Ready";
-    cacheSizeLabel.textContent = "Local Storage: Cached (~23.8 MB)";
+    cacheSizeLabel.textContent = "Storage: Cached (~23.8 MB)";
     generateBtn.disabled = false;
   } catch (err) {
     statusDot.className = "dot error";
@@ -1442,9 +1543,8 @@ async function synthesize() {
     const wavBlob = encodeWav(full, SAMPLE_RATE);
     const url = URL.createObjectURL(wavBlob);
     
-    // Create new id for the history item and pass it to player
     const newId = Date.now().toString();
-    loadAudioToPlayer(url, newId);
+    loadAudioToPlayer(url, newId, full);
 
     saveHistoryItem({
       id: newId,
@@ -1478,7 +1578,7 @@ generateBtn.addEventListener("click", synthesize);
 deleteCacheBtn.addEventListener("click", async () => {
   if ("caches" in window) {
     await caches.delete(CACHE_NAME);
-    cacheSizeLabel.textContent = "Local Storage: Uncached";
+    cacheSizeLabel.textContent = "Storage: Uncached";
     location.reload();
   }
 });
