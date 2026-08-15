@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kitten TTS · Nano — On-Device Speech Synthesis</title>
+<meta name="description" content="A 15M-parameter, INT8-quantized text-to-speech model running entirely in your browser. No server, no API keys, no data leaving your machine." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #0a0d11;
+    --bg-grid: #0d1116;
+    --panel: #12161d;
+    --panel-raised: #1a212b;
+    --panel-raised-2: #212936;
+    --border: #242c38;
+    --border-soft: #1b222c;
+    --text: #edeff3;
+    --text-muted: #8b93a3;
+    --text-faint: #545c6b;
+    --amber: #f2a93c;
+    --amber-dim: #8a6323;
+    --amber-glow: rgba(242,169,60,0.35);
+    --cyan: #56d2c8;
+    --cyan-dim: #2c5450;
+    --red: #e8604c;
+    --red-dim: #402420;
+    --green: #6fd08c;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ color-scheme: dark; }
+  body{
+    margin: 0;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(242,169,60,0.06), transparent 60%),
+      radial-gradient(900px 500px at 90% 10%, rgba(86,210,200,0.05), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  ::selection{ background: var(--amber-glow); color: var(--text); }
+
+  a{ color: var(--cyan); }
+
+  button, input, select, textarea{ font-family: inherit; }
+
+  /* focus visibility */
+  :focus-visible{
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .wrap{
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  /* ---------- Header ---------- */
+  header.app-header{
+    margin-bottom: 40px;
+  }
+  .eyebrow{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--amber);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .eyebrow .dot{
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 3px rgba(111,208,140,0.15);
+  }
+  .eyebrow .dot.offline{ background: var(--text-faint); box-shadow: none; }
+  .eyebrow .dot.busy{ background: var(--amber); box-shadow: 0 0 0 3px var(--amber-glow); animation: pulse-dot 1.1s ease-in-out infinite; }
+  .eyebrow .dot.error{ background: var(--red); box-shadow: 0 0 0 3px rgba(232,96,76,0.18); }
+  @keyframes pulse-dot{ 0%,100%{ opacity: 1; } 50%{ opacity: 0.35; } }
+
+  h1.title{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(30px, 5vw, 42px);
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+  }
+  h1.title .accent{ color: var(--amber); }
+
+  p.subtitle{
+    color: var(--text-muted);
+    font-size: 15.5px;
+    max-width: 60ch;
+    margin: 0;
+  }
+  p.subtitle code{
+    font-family: var(--font-mono);
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: var(--cyan);
+  }
+
+  /* ---------- Signal path (signature element) ---------- */
+  .signal-path{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin: 28px 0 0;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .signal-stage{
+    position: relative;
+    padding: 16px 16px 14px;
+    border-right: 1px solid var(--border);
+    transition: background 0.35s ease;
+  }
+  .signal-stage:last-child{ border-right: none; }
+  .signal-stage .num{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.05em;
+  }
+  .signal-stage .label{
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 4px;
+    color: var(--text-muted);
+    transition: color 0.35s ease;
+  }
+  .signal-stage.active{ background: linear-gradient(180deg, rgba(242,169,60,0.10), transparent); }
+  .signal-stage.active .label{ color: var(--amber); }
+  .signal-stage.active .num{ color: var(--amber-dim); }
+  .signal-stage.done .label{ color: var(--text); }
+  .signal-stage.done::after{
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+    background: var(--cyan);
+  }
+  .signal-stage.active::after{
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+    background: var(--amber);
+    animation: sweep 1.4s ease-in-out infinite;
+  }
+  @keyframes sweep{ 0%{ opacity: 0.3; } 50%{ opacity: 1; } 100%{ opacity: 0.3; } }
+
+  /* ---------- Panels ---------- */
+  .panel{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-top: 20px;
+  }
+  .panel h2{
+    font-family: var(--font-display);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .panel h2 .badge{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0;
+    text-transform: none;
+    padding: 3px 9px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .badge.cached{ color: var(--green); border-color: rgba(111,208,140,0.3); background: rgba(111,208,140,0.06); }
+  .badge.not-cached{ color: var(--text-faint); }
+  .badge.downloading{ color: var(--amber); border-color: rgba(242,169,60,0.3); background: rgba(242,169,60,0.06); }
+  .badge.error{ color: var(--red); border-color: rgba(232,96,76,0.35); background: rgba(232,96,76,0.06); }
+
+  /* ---------- Model / download panel ---------- */
+  .model-meta{
+    display: flex; flex-wrap: wrap; gap: 8px 20px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .model-meta a{ color: var(--text-muted); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px; }
+  .model-meta a:hover{ color: var(--cyan); text-decoration-color: var(--cyan); }
+
+  .progress-row{ margin-top: 10px; }
+  .progress-status{
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-muted);
+    display: flex; justify-content: space-between; gap: 12px;
+    margin-bottom: 8px;
+  }
+  .progress-status .pct{ color: var(--amber); }
+  .progress-track{
+    height: 8px;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill{
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+    border-radius: 100px;
+    transition: width 0.25s ease;
+  }
+  .progress-fill.indeterminate{
+    width: 30% !important;
+    animation: indet 1.2s ease-in-out infinite;
+  }
+  @keyframes indet{
+    0%{ transform: translateX(-100%); }
+    100%{ transform: translateX(430%); }
+  }
+
+  .cache-actions{
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 16px;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--panel-raised);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn:hover:not(:disabled){ background: var(--panel-raised-2); border-color: #33404f; }
+  .btn:active:not(:disabled){ transform: translateY(1px); }
+  .btn:disabled{ opacity: 0.4; cursor: not-allowed; }
+  .btn.primary{
+    background: var(--amber);
+    border-color: var(--amber);
+    color: #1a1204;
+  }
+  .btn.primary:hover:not(:disabled){ background: #ffb84f; border-color: #ffb84f; }
+  .btn.ghost{ background: transparent; }
+  .btn.danger{ color: var(--red); }
+  .btn.danger:hover:not(:disabled){ background: var(--red-dim); border-color: rgba(232,96,76,0.4); }
+  .btn.small{ padding: 7px 12px; font-size: 12.5px; }
+  .btn svg{ width: 15px; height: 15px; flex-shrink: 0; }
+
+  .btn.primary.busy{
+    background: var(--amber-dim);
+    border-color: var(--amber-dim);
+    color: rgba(255,255,255,0.7);
+  }
+  .spinner{
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: rgba(255,255,255,0.95);
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  /* ---------- Synthesis panel ---------- */
+  .field{ margin-bottom: 18px; }
+  .field:last-child{ margin-bottom: 0; }
+  .field-label{
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+  }
+  .field-label .count{ color: var(--text-faint); }
+  .field-label .count.limit{ color: var(--red); }
+
+  textarea#text-input{
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding: 14px;
+    line-height: 1.55;
+  }
+  textarea#text-input::placeholder{ color: var(--text-faint); }
+
+  .try-example{
+    background: none; border: none; color: var(--cyan);
+    font-family: var(--font-mono); font-size: 12px;
+    cursor: pointer; padding: 0; text-decoration: underline;
+    text-underline-offset: 3px; text-decoration-color: var(--cyan-dim);
+  }
+  .try-example:hover{ text-decoration-color: var(--cyan); }
+
+  .phoneme-preview{
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--cyan);
+    background: var(--panel-raised);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    min-height: 18px;
+    word-break: break-word;
+  }
+  .phoneme-preview .tag{
+    color: var(--text-faint);
+    margin-right: 8px;
+  }
+  .phoneme-preview.empty{ color: var(--text-faint); font-style: italic; }
+
+  .controls-row{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 18px;
+  }
+  @media (max-width: 560px){ .controls-row{ grid-template-columns: 1fr; } }
+
+  select#voice-select{
+    width: 100%;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+  }
+
+  input[type="range"]{
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--amber);
+    cursor: pointer;
+    border: 2px solid #1a1204;
+    box-shadow: 0 0 0 3px var(--amber-glow);
+  }
+  input[type="range"]::-moz-range-thumb{
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--amber);
+    cursor: pointer;
+    border: 2px solid #1a1204;
+  }
+
+  .generate-row{
+    display: flex; align-items: center; gap: 14px;
+    margin-top: 22px;
+    flex-wrap: wrap;
+  }
+  .generate-hint{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+
+  /* ---------- Error banner ---------- */
+  .error-banner{
+    display: none;
+    margin-top: 16px;
+    background: var(--red-dim);
+    border: 1px solid rgba(232,96,76,0.35);
+    color: #ffd9d1;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 13.5px;
+    display: none;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .error-banner.show{ display: flex; }
+  .error-banner svg{ width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; color: var(--red); }
+  .error-banner .msg strong{ display: block; font-family: var(--font-display); font-size: 13px; margin-bottom: 2px; color: #fff; }
+
+  /* ---------- Output panel ---------- */
+  .output-panel{ display: none; }
+  .output-panel.show{ display: block; }
+  canvas#waveform{
+    width: 100%;
+    height: 110px;
+    display: block;
+    background: var(--panel-raised);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+  }
+  .playback-row{
+    display: flex; align-items: center; gap: 14px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  audio#player{
+    flex: 1;
+    min-width: 220px;
+    height: 36px;
+    accent-color: var(--amber);
+  }
+
+  /* ---------- Footer ---------- */
+  footer{
+    margin-top: 44px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border-soft);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-faint);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+  footer a{ color: var(--text-faint); }
+  footer a:hover{ color: var(--cyan); }
+
+  @media (prefers-reduced-motion: reduce){
+    .signal-stage.active::after, .spinner, .progress-fill.indeterminate, .eyebrow .dot.busy{ animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="app-header">
+    <div class="eyebrow"><span class="dot offline" id="status-dot"></span><span id="status-text">Model not loaded</span></div>
+    <h1 class="title">Kitten TTS <span class="accent">· Nano</span></h1>
+    <p class="subtitle">
+      A 15M-parameter, INT8-quantized speech model that runs the entire pipeline — phonemization, tensor inference,
+      and audio rendering — locally in this tab via <code>onnxruntime-web</code>. Nothing you type ever leaves your browser.
+    </p>
+
+    <div class="signal-path" id="signal-path" aria-hidden="true">
+      <div class="signal-stage" data-stage="text"><div class="num">01</div><div class="label">Text</div></div>
+      <div class="signal-stage" data-stage="phonemize"><div class="num">02</div><div class="label">Phonemes</div></div>
+      <div class="signal-stage" data-stage="infer"><div class="num">03</div><div class="label">Neural Net</div></div>
+      <div class="signal-stage" data-stage="render"><div class="num">04</div><div class="label">Waveform</div></div>
+    </div>
+  </header>
+
+  <!-- Model / cache panel -->
+  <section class="panel" id="model-panel">
+    <h2>Model
+      <span class="badge not-cached" id="cache-badge">checking cache…</span>
+    </h2>
+    <div class="model-meta">
+      <span>kitten-tts-nano-0.1</span>
+      <span>·</span>
+      <span>style_text_to_speech_2 / ONNX, INT8</span>
+      <span>·</span>
+      <a href="https://huggingface.co/KittenML/kitten-tts-nano-0.1" target="_blank" rel="noopener">source ↗</a>
+    </div>
+
+    <div class="progress-row">
+      <div class="progress-status">
+        <span id="progress-label">Waiting to start…</span>
+        <span class="pct" id="progress-pct"></span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+
+    <div class="cache-actions">
+      <button class="btn small ghost" id="retry-load-btn" style="display:none;">Retry download</button>
+      <button class="btn small danger ghost" id="clear-cache-btn">Delete cached model</button>
+    </div>
+
+    <div class="error-banner" id="model-error">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="msg"><strong>Couldn't load the model</strong><span id="model-error-text"></span></div>
+    </div>
+  </section>
+
+  <!-- Synthesis panel -->
+  <section class="panel">
+    <h2>Synthesize</h2>
+
+    <div class="field">
+      <div class="field-label">
+        <span>Text <button class="try-example" id="try-example-btn" type="button">try an example</button></span>
+        <span class="count" id="char-count">0 / 2000</span>
+      </div>
+      <textarea id="text-input" maxlength="2000" placeholder="Type or paste text to synthesize. Punctuation and sentence structure affect pacing, so full sentences sound most natural."></textarea>
+      <div class="phoneme-preview empty" id="phoneme-preview">Phoneme preview will appear here as you type…</div>
+    </div>
+
+    <div class="controls-row">
+      <div class="field">
+        <div class="field-label"><span>Voice</span></div>
+        <select id="voice-select">
+          <optgroup label="Voice 2">
+            <option value="expr-voice-2-m">Voice 2 — Male</option>
+            <option value="expr-voice-2-f">Voice 2 — Female</option>
+          </optgroup>
+          <optgroup label="Voice 3">
+            <option value="expr-voice-3-m">Voice 3 — Male</option>
+            <option value="expr-voice-3-f">Voice 3 — Female</option>
+          </optgroup>
+          <optgroup label="Voice 4">
+            <option value="expr-voice-4-m">Voice 4 — Male</option>
+            <option value="expr-voice-4-f">Voice 4 — Female</option>
+          </optgroup>
+          <optgroup label="Voice 5">
+            <option value="expr-voice-5-m" selected>Voice 5 — Male</option>
+            <option value="expr-voice-5-f">Voice 5 — Female</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label"><span>Speed</span><span class="count" id="speed-readout">1.00×</span></div>
+        <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.05" value="1.0" />
+      </div>
+    </div>
+
+    <div class="generate-row">
+      <button class="btn primary" id="generate-btn" disabled>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Generate speech
+      </button>
+      <span class="generate-hint" id="generate-hint">Waiting for model…</span>
+    </div>
+
+    <div class="error-banner" id="gen-error">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="msg"><strong>Generation failed</strong><span id="gen-error-text"></span></div>
+    </div>
+  </section>
+
+  <!-- Output panel -->
+  <section class="panel output-panel" id="output-panel">
+    <h2>Output <span class="badge" id="output-meta"></span></h2>
+    <canvas id="waveform"></canvas>
+    <div class="playback-row">
+      <audio id="player" controls></audio>
+      <a class="btn" id="download-btn" download="kitten-tts-output.wav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+        Download .wav
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <span>Runs 100% client-side · onnxruntime-web (WASM) · phonemizer.js (espeak-ng)</span>
+    <span>Model: <a href="https://huggingface.co/KittenML/kitten-tts-nano-0.1" target="_blank" rel="noopener">KittenML/kitten-tts-nano-0.1</a> (Apache-2.0)</span>
+  </footer>
+
+</div>
+
+<!-- ============================================================
+     Worker source, embedded inline so the whole app stays a
+     single file. Loaded as text and turned into a Blob Worker
+     at runtime — this is a classic (non-module) worker so it can
+     use importScripts() to pull in the ONNX Runtime Web UMD build.
+     ============================================================ -->
+<script type="text/plain" id="worker-source">
+"use strict";
+
+// ONNX Runtime Web (WASM execution provider only -- the INT8-quantized
+// graph uses MatMulInteger / DynamicQuantizeLSTM ops that are not
+// supported by the WebGPU EP in onnxruntime-web, so WASM is the only
+// backend that reliably avoids NaN / corrupted output for this model).
+importScripts("https://cdn.jsdelivr.net/npm/onnxruntime-web@1.27.0/dist/ort.min.js");
+
+ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.27.0/dist/";
+// Single-threaded: avoids requiring cross-origin-isolation (COOP/COEP)
+// headers, which a plain static index.html generally won't have.
+ort.env.wasm.numThreads = 1;
+ort.env.wasm.simd = true;
+
+let session = null;
+
+function reply(msg, transfer){
+  if (transfer) self.postMessage(msg, transfer);
+  else self.postMessage(msg);
+}
+
+self.onmessage = async function (e) {
+  const data = e.data || {};
+  const { type, id } = data;
+  try {
+    if (type === "init") {
+      session = await ort.InferenceSession.create(data.modelBuffer, {
+        executionProviders: ["wasm"],
+        graphOptimizationLevel: "all",
+      });
+      reply({ type: "init-done", id, outputName: session.outputNames[0] });
+    } else if (type === "infer") {
+      if (!session) throw new Error("Inference session is not initialized yet.");
+      const { inputIds, style, styleDim, speed } = data;
+      const idsBig = new BigInt64Array(inputIds.length);
+      for (let i = 0; i < inputIds.length; i++) idsBig[i] = BigInt(inputIds[i]);
+
+      const inputTensor = new ort.Tensor("int64", idsBig, [1, inputIds.length]);
+      const styleTensor = new ort.Tensor("float32", new Float32Array(style), [1, styleDim]);
+      const speedTensor = new ort.Tensor("float32", new Float32Array([speed]), [1]);
+
+      const outputs = await session.run({
+        input_ids: inputTensor,
+        style: styleTensor,
+        speed: speedTensor,
+      });
+
+      const outName = session.outputNames[0];
+      const raw = outputs[outName].data; // Float32Array (may be a typed-array view)
+
+      let hasNaN = false;
+      for (let i = 0; i < raw.length; i++) {
+        if (Number.isNaN(raw[i])) { hasNaN = true; break; }
+      }
+
+      // The vocoder appends a short trailing tail/artifact; trim it,
+      // matching the reference KittenTTS implementation, but only
+      // when the chunk is long enough that trimming won't zero it out.
+      const trimmed = raw.length > 24000 ? raw.subarray(0, raw.length - 5000) : raw;
+      const out = new Float32Array(trimmed); // fresh, transferable backing buffer
+
+      reply({ type: "infer-done", id, audio: out.buffer, hasNaN }, [out.buffer]);
+    } else {
+      throw new Error("Unknown worker message type: " + type);
+    }
+  } catch (err) {
+    reply({ type: "error", id, error: (err && err.message) || String(err) });
+  }
+};
+
+self.onerror = function (e) {
+  reply({ type: "error", error: (e && e.message) || "Unknown worker error" });
+};
+self.addEventListener("unhandledrejection", function (e) {
+  reply({ type: "error", error: (e.reason && e.reason.message) || String(e.reason) });
+});
+</script>
+
+<script type="module">
+// =========================================================================
+// Kitten TTS Nano — single-file browser client
+//
+// Pipeline (matches the official KittenML/KittenTTS reference implementation):
+//   text -> punctuation-preserving espeak-ng phonemization (phonemizer.js,
+//   a WASM build of espeak-ng) -> character-level token IDs (fixed 178-symbol
+//   table used by the model's text encoder) -> per-length voice style vector
+//   -> ONNX Runtime Web (WASM EP) -> 24kHz float32 PCM -> WAV.
+//
+// Model source: https://huggingface.co/KittenML/kitten-tts-nano-0.1
+//   - kitten_tts_nano_v0_1.onnx  (~23.8 MB, INT8)
+//   - voices.npz                 (~10 KB, 8 voice-style embeddings)
+// =========================================================================
+
+import { phonemize } from "https://cdn.jsdelivr.net/npm/phonemizer@1.2.1/+esm";
+
+// ---------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------
+const REPO = "KittenML/kitten-tts-nano-0.1";
+const MODEL_FILE = "kitten_tts_nano_v0_1.onnx";
+const VOICES_FILE = "voices.npz";
+const resolveUrl = (file) => `https://huggingface.co/${REPO}/resolve/main/${file}`;
+const MODEL_URL = resolveUrl(MODEL_FILE);
+const VOICES_URL = resolveUrl(VOICES_FILE);
+
+const CACHE_NAME = "kitten-tts-nano-0.1-v1";
+const SAMPLE_RATE = 24000;
+const MAX_CHUNK_CHARS = 400;
+const MAX_INPUT_CHARS = 2000;
+
+// Exact 178-symbol table from the model's TextCleaner (KittenTTS
+// kittentts/onnx_model.py). Index 0 is the pad/BOS/EOS token; index 10
+// (the ellipsis "…") is used as an end-of-utterance marker.
+const PAD = "$";
+const PUNCTUATION_SYMS = ';:,.!?¡¿—…"«»"" ';
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+const LETTERS_IPA = "ɑɐɒæɓʙβɔɕçɗɖðʤəɘɚɛɜɝɞɟʄɡɠɢʛɦɧħɥʜɨɪʝɭɬɫɮʟɱɯɰŋɳɲɴøɵɸθœɶʘɹɺɾɻʀʁɽʂʃʈʧʉʊʋⱱʌɣɤʍχʎʏʑʐʒʔʡʕʢǀǁǂǃˈˌːˑʼʴʰʱʲʷˠˤ˞↓↑→↗↘'̩'ᵻ";
+const SYMBOLS = [PAD, ...PUNCTUATION_SYMS, ...LETTERS, ...LETTERS_IPA];
+const CHAR_TO_ID = Object.create(null);
+SYMBOLS.forEach((s, i) => { CHAR_TO_ID[s] = i; });
+
+// Clusters of punctuation (with surrounding whitespace) that we strip out
+// before handing text to espeak, then splice back in verbatim afterwards --
+// this reproduces the official Python pipeline's preserve_punctuation=True
+// behavior, since the WASM phonemizer itself discards punctuation.
+const PUNCT_CLUSTER_RE = /(\s*[;:,.!?¡¿—…"«»""()[\]{}]+\s*)+/g;
+const TOKEN_RE = /[\p{L}\p{N}_]+|[^\p{L}\p{N}_\s]/gu;
+
+const VOICE_LABELS = {
+  "expr-voice-2-m": "Voice 2 — Male", "expr-voice-2-f": "Voice 2 — Female",
+  "expr-voice-3-m": "Voice 3 — Male", "expr-voice-3-f": "Voice 3 — Female",
+  "expr-voice-4-m": "Voice 4 — Male", "expr-voice-4-f": "Voice 4 — Female",
+  "expr-voice-5-m": "Voice 5 — Male", "expr-voice-5-f": "Voice 5 — Female",
+};
+
+const EXAMPLE_TEXT = "Kitten TTS is a fifteen million parameter speech model, small enough to run entirely inside a browser tab. No server, no API key, and no audio ever leaves this device.";
+
+// ---------------------------------------------------------------------
+// DOM references
+// ---------------------------------------------------------------------
+const el = (id) => document.getElementById(id);
+const statusDot = el("status-dot");
+const statusText = el("status-text");
+const cacheBadge = el("cache-badge");
+const progressLabel = el("progress-label");
+const progressPct = el("progress-pct");
+const progressFill = el("progress-fill");
+const clearCacheBtn = el("clear-cache-btn");
+const retryLoadBtn = el("retry-load-btn");
+const modelErrorBanner = el("model-error");
+const modelErrorText = el("model-error-text");
+
+const textInput = el("text-input");
+const charCount = el("char-count");
+const phonemePreview = el("phoneme-preview");
+const tryExampleBtn = el("try-example-btn");
+const voiceSelect = el("voice-select");
+const speedSlider = el("speed-slider");
+const speedReadout = el("speed-readout");
+const generateBtn = el("generate-btn");
+const generateHint = el("generate-hint");
+const genErrorBanner = el("gen-error");
+const genErrorText = el("gen-error-text");
+
+const outputPanel = el("output-panel");
+const outputMeta = el("output-meta");
+const waveformCanvas = el("waveform");
+const player = el("player");
+const downloadBtn = el("download-btn");
+
+const signalStages = {
+  text: document.querySelector('.signal-stage[data-stage="text"]'),
+  phonemize: document.querySelector('.signal-stage[data-stage="phonemize"]'),
+  infer: document.querySelector('.signal-stage[data-stage="infer"]'),
+  render: document.querySelector('.signal-stage[data-stage="render"]'),
+};
+
+// ---------------------------------------------------------------------
+// App state
+// ---------------------------------------------------------------------
+const state = {
+  modelReady: false,
+  isGenerating: false,
+  voices: null,       // { [voiceName]: { data: Float32Array, shape: [n, dim] } }
+  worker: null,
+  workerReqId: 0,
+  workerPending: new Map(),
+  lastAudio: null,
+  lastWavUrl: null,
+};
+
+// =========================================================================
+// Tiny ZIP + NPY reader (enough to read a NumPy .npz voice bank in-browser,
+// with no external dependency). NPZ is just a standard ZIP archive of .npy
+// files, so this is a minimal ZIP central-directory reader plus a NPY v1/v2
+// header parser. DEFLATE entries are decompressed with the native
+// DecompressionStream API; STORED entries are copied directly.
+// =========================================================================
+async function unzip(arrayBuffer) {
+  const bytes = new Uint8Array(arrayBuffer);
+  const view = new DataView(arrayBuffer);
+
+  let eocd = -1;
+  for (let i = bytes.length - 22; i >= 0; i--) {
+    if (view.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd === -1) throw new Error("voices.npz does not look like a valid ZIP archive.");
+
+  const totalEntries = view.getUint16(eocd + 10, true);
+  const cdOffset = view.getUint32(eocd + 16, true);
+
+  const entries = [];
+  let cursor = cdOffset;
+  for (let i = 0; i < totalEntries; i++) {
+    if (view.getUint32(cursor, true) !== 0x02014b50) break;
+    const compressionMethod = view.getUint16(cursor + 10, true);
+    const compressedSize = view.getUint32(cursor + 20, true);
+    const uncompressedSize = view.getUint32(cursor + 24, true);
+    const nameLen = view.getUint16(cursor + 28, true);
+    const extraLen = view.getUint16(cursor + 30, true);
+    const commentLen = view.getUint16(cursor + 32, true);
+    const localHeaderOffset = view.getUint32(cursor + 42, true);
+    const fileName = new TextDecoder().decode(bytes.slice(cursor + 46, cursor + 46 + nameLen));
+    entries.push({ fileName, compressionMethod, compressedSize, uncompressedSize, localHeaderOffset });
+    cursor += 46 + nameLen + extraLen + commentLen;
+  }
+
+  const files = new Map();
+  for (const entry of entries) {
+    const lh = entry.localHeaderOffset;
+    const lNameLen = view.getUint16(lh + 26, true);
+    const lExtraLen = view.getUint16(lh + 28, true);
+    const dataStart = lh + 30 + lNameLen + lExtraLen;
+
+    let data;
+    if (entry.compressionMethod === 0) {
+      data = bytes.slice(dataStart, dataStart + entry.uncompressedSize);
+    } else if (entry.compressionMethod === 8) {
+      const compressed = bytes.slice(dataStart, dataStart + entry.compressedSize);
+      const ds = new DecompressionStream("deflate-raw");
+      const writer = ds.writable.getWriter();
+      writer.write(compressed);
+      writer.close();
+      const reader = ds.readable.getReader();
+      const parts = [];
+      let total = 0;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        parts.push(value);
+        total += value.length;
+      }
+      data = new Uint8Array(total);
+      let off = 0;
+      for (const p of parts) { data.set(p, off); off += p.length; }
+    } else {
+      console.warn(`Skipping ${entry.fileName}: unsupported ZIP compression method ${entry.compressionMethod}`);
+      continue;
+    }
+    files.set(entry.fileName, data);
+  }
+  return files;
+}
+
+function parseNpyHeader(bytes) {
+  if (bytes[0] !== 0x93 || new TextDecoder().decode(bytes.slice(1, 6)) !== "NUMPY") {
+    throw new Error("Not a valid .npy entry.");
+  }
+  const majorVersion = bytes[6];
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  let headerLen, headerStart;
+  if (majorVersion === 1) {
+    headerLen = view.getUint16(8, true);
+    headerStart = 10;
+  } else {
+    headerLen = view.getUint32(8, true);
+    headerStart = 12;
+  }
+  const headerStr = new TextDecoder().decode(bytes.slice(headerStart, headerStart + headerLen));
+  const descrMatch = headerStr.match(/'descr'\s*:\s*'([^']+)'/);
+  const shapeMatch = headerStr.match(/'shape'\s*:\s*\(([^)]*)\)/);
+  if (!descrMatch) throw new Error("Could not parse dtype from .npy header.");
+  const shape = shapeMatch
+    ? shapeMatch[1].split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => !Number.isNaN(n))
+    : [];
+  return { descr: descrMatch[1], shape, dataOffset: headerStart + headerLen };
+}
+
+function parseNpy(bytes) {
+  const { descr, shape, dataOffset } = parseNpyHeader(bytes);
+  const raw = bytes.slice(dataOffset);
+  const buf = raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength);
+  let data;
+  if (descr === "<f4" || descr === "float32") {
+    data = new Float32Array(buf);
+  } else if (descr === "<f8" || descr === "float64") {
+    const f64 = new Float64Array(buf);
+    data = new Float32Array(f64.length);
+    for (let i = 0; i < f64.length; i++) data[i] = f64[i];
+  } else {
+    throw new Error(`Unsupported voice embedding dtype: ${descr}`);
+  }
+  return { data, shape };
+}
+
+async function loadVoicesFromNpz(arrayBuffer) {
+  const files = await unzip(arrayBuffer);
+  const voices = {};
+  for (const [name, bytes] of files) {
+    if (!name.endsWith(".npy")) continue;
+    const voiceName = name.replace(/\.npy$/, "");
+    const { data, shape } = parseNpy(bytes);
+    voices[voiceName] = { data, shape: [shape[0] || 1, shape[1] || data.length] };
+  }
+  return voices;
+}
+
+// =========================================================================
+// Text -> phonemes -> token IDs
+// =========================================================================
+function charsToIds(text) {
+  const ids = [];
+  for (const ch of text) {
+    const id = CHAR_TO_ID[ch];
+    if (id !== undefined) ids.push(id);
+  }
+  return ids;
+}
+
+function tokenizeToInputIds(cleanedPhonemeText) {
+  const ids = charsToIds(cleanedPhonemeText);
+  ids.unshift(0);  // BOS
+  ids.push(10);    // end-of-utterance marker ("…")
+  ids.push(0);     // EOS
+  return ids;
+}
+
+function basicEnglishTokenize(text) {
+  return text.match(TOKEN_RE) || [];
+}
+
+// Phonemize `text` while preserving punctuation exactly where it appears,
+// since the WASM espeak-ng backend strips it. Returns the raw phoneme
+// string plus the whitespace-normalized version used for tokenization.
+async function phonemizeWithPunctuation(text) {
+  const segments = [];
+  let last = 0;
+  for (const m of text.matchAll(PUNCT_CLUSTER_RE)) {
+    if (last < m.index) segments.push({ punct: false, text: text.slice(last, m.index) });
+    segments.push({ punct: true, text: m[0] });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) segments.push({ punct: false, text: text.slice(last) });
+
+  const parts = await Promise.all(segments.map(async (seg) => {
+    if (seg.punct) return seg.text;
+    if (!seg.text.trim()) return seg.text;
+    const phones = await phonemize(seg.text, "en-us");
+    return phones.join(" ");
+  }));
+
+  const phonemeString = parts.join("");
+  const cleaned = basicEnglishTokenize(phonemeString).join(" ");
+  return { phonemeString, cleaned };
+}
+
+function ensureTrailingPunctuation(sentence) {
+  const t = sentence.trim();
+  if (!t) return t;
+  return ".!?,;:".includes(t[t.length - 1]) ? t : t + ".";
+}
+
+// Split long input into <=maxLen chunks on sentence boundaries (falling
+// back to word boundaries for very long sentences), matching the
+// reference browser implementation's chunking strategy.
+function chunkText(text, maxLen = MAX_CHUNK_CHARS) {
+  const sentences = text.match(/[^.!?]*[.!?]+|[^.!?]+$/g) || [text];
+  const chunks = [];
+  for (let s of sentences) {
+    s = s.trim();
+    if (!s) continue;
+    if (s.length <= maxLen) {
+      chunks.push(ensureTrailingPunctuation(s));
+      continue;
+    }
+    const words = s.split(/\s+/);
+    let cur = "";
+    for (const w of words) {
+      if (cur.length + w.length + 1 <= maxLen) {
+        cur += (cur ? " " : "") + w;
+      } else {
+        if (cur) chunks.push(ensureTrailingPunctuation(cur));
+        cur = w;
+      }
+    }
+    if (cur) chunks.push(ensureTrailingPunctuation(cur));
+  }
+  return chunks.length ? chunks : [text];
+}
+
+// =========================================================================
+// Cache-aware download with live progress
+// =========================================================================
+function cachesAvailable() {
+  return "caches" in window;
+}
+
+async function getCachedBuffer(url) {
+  if (!cachesAvailable()) return null;
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const res = await cache.match(url);
+    if (!res) return null;
+    return await res.arrayBuffer();
+  } catch {
+    return null;
+  }
+}
+
+async function putInCache(url, arrayBuffer) {
+  if (!cachesAvailable()) return;
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(url, new Response(arrayBuffer.slice(0), {
+      headers: { "Content-Type": "application/octet-stream", "Content-Length": String(arrayBuffer.byteLength) },
+    }));
+  } catch (e) {
+    console.warn("Could not persist model asset to cache:", e);
+  }
+}
+
+async function isFullyCached() {
+  const [m, v] = await Promise.all([getCachedBuffer(MODEL_URL), getCachedBuffer(VOICES_URL)]);
+  return !!(m && v) ? { model: m, voices: v } : null;
+}
+
+function formatMB(bytes) { return (bytes / (1024 * 1024)).toFixed(1); }
+function formatSpeed(bytesPerSec) {
+  if (!bytesPerSec || !isFinite(bytesPerSec)) return "";
+  return `${(bytesPerSec / (1024 * 1024)).toFixed(2)} MB/s`;
+}
+
+// Downloads a URL with byte-level progress, falling back to indeterminate
+// progress if the server doesn't expose Content-Length cross-origin.
+async function fetchWithProgress(url, onProgress) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`HTTP ${response.status} while downloading ${url.split("/").pop()}`);
+  const total = parseInt(response.headers.get("content-length") || "0", 10);
+
+  if (!response.body) {
+    // Streaming not supported (very old browser) -- fall back to a single await.
+    const buf = await response.arrayBuffer();
+    onProgress({ loaded: buf.byteLength, total: buf.byteLength, speed: 0 });
+    return buf;
+  }
+
+  const reader = response.body.getReader();
+  const chunks = [];
+  let loaded = 0;
+  let lastTime = performance.now();
+  let lastLoaded = 0;
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    loaded += value.length;
+    const now = performance.now();
+    if (now - lastTime > 120) {
+      const speed = ((loaded - lastLoaded) / ((now - lastTime) / 1000)) || 0;
+      onProgress({ loaded, total, speed });
+      lastTime = now;
+      lastLoaded = loaded;
+    }
+  }
+  onProgress({ loaded, total, speed: 0, done: true });
+
+  const merged = new Uint8Array(loaded);
+  let offset = 0;
+  for (const c of chunks) { merged.set(c, offset); offset += c.length; }
+  return merged.buffer;
+}
+
+// =========================================================================
+// Worker plumbing (Blob-based classic worker so the whole app is one file)
+// =========================================================================
+function createTtsWorker() {
+  const src = document.getElementById("worker-source").textContent;
+  const blob = new Blob([src], { type: "application/javascript" });
+  const worker = new Worker(URL.createObjectURL(blob));
+  worker.onmessage = (e) => {
+    const { id } = e.data || {};
+    const pending = state.workerPending.get(id);
+    if (!pending) return;
+    state.workerPending.delete(id);
+    if (e.data.type === "error") pending.reject(new Error(e.data.error || "Worker error"));
+    else pending.resolve(e.data);
+  };
+  worker.onerror = (e) => {
+    // Reject every outstanding request -- a top-level worker error means
+    // the session is in an unknown state.
+    for (const [, pending] of state.workerPending) pending.reject(new Error(e.message || "Worker crashed"));
+    state.workerPending.clear();
+  };
+  return worker;
+}
+
+function callWorker(type, payload, transfer) {
+  return new Promise((resolve, reject) => {
+    const id = ++state.workerReqId;
+    state.workerPending.set(id, { resolve, reject });
+    state.worker.postMessage({ type, id, ...payload }, transfer || []);
+  });
+}
+
+// =========================================================================
+// UI helpers
+// =========================================================================
+function setStatus(kind, text) {
+  statusDot.className = "dot" + (kind ? " " + kind : "");
+  statusText.textContent = text;
+}
+
+function setCacheBadge(kind, text) {
+  cacheBadge.className = "badge" + (kind ? " " + kind : "");
+  cacheBadge.textContent = text;
+}
+
+function setPipelineStage(stage) {
+  const order = ["text", "phonemize", "infer", "render"];
+  const idx = stage ? order.indexOf(stage) : -1;
+  order.forEach((s, i) => {
+    const node = signalStages[s];
+    node.classList.remove("active", "done");
+    if (idx === -1) return;
+    if (i < idx || (stage === "done-all")) node.classList.add("done");
+    else if (i === idx) node.classList.add("active");
+  });
+  if (stage === "done-all") order.forEach((s) => signalStages[s].classList.add("done"));
+}
+
+function showModelError(message) {
+  modelErrorText.textContent = message;
+  modelErrorBanner.classList.add("show");
+  retryLoadBtn.style.display = "inline-flex";
+  setCacheBadge("error", "load failed");
+  setStatus("error", "Model failed to load");
+}
+function clearModelError() {
+  modelErrorBanner.classList.remove("show");
+  retryLoadBtn.style.display = "none";
+}
+
+function showGenError(message) {
+  genErrorText.textContent = message;
+  genErrorBanner.classList.add("show");
+}
+function clearGenError() { genErrorBanner.classList.remove("show"); }
+
+function updateCharCount() {
+  const n = textInput.value.length;
+  charCount.textContent = `${n} / ${MAX_INPUT_CHARS}`;
+  charCount.classList.toggle("limit", n >= MAX_INPUT_CHARS);
+}
+
+function setGenerating(isGenerating) {
+  state.isGenerating = isGenerating;
+  generateBtn.disabled = isGenerating || !state.modelReady;
+  voiceSelect.disabled = isGenerating;
+  speedSlider.disabled = isGenerating;
+  generateBtn.classList.toggle("busy", isGenerating);
+  generateBtn.innerHTML = isGenerating
+    ? '<span class="spinner"></span> Generating…'
+    : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Generate speech';
+}
+
+// =========================================================================
+// WAV encoding (16-bit PCM, mono)
+// =========================================================================
+function encodeWavPCM16(float32Audio, sampleRate) {
+  const numSamples = float32Audio.length;
+  const blockAlign = 2;
+  const byteRate = sampleRate * blockAlign;
+  const dataSize = numSamples * 2;
+  const buf = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buf);
+
+  const writeStr = (offset, str) => { for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); };
+
+  writeStr(0, "RIFF");
+  view.setUint32(4, 36 + dataSize, true);
+  writeStr(8, "WAVE");
+  writeStr(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);       // PCM
+  view.setUint16(22, 1, true);       // mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, byteRate, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, 16, true);      // bits per sample
+  writeStr(36, "data");
+  view.setUint32(40, dataSize, true);
+
+  let offset = 44;
+  for (let i = 0; i < numSamples; i++) {
+    let s = float32Audio[i];
+    if (!Number.isFinite(s)) s = 0;           // guard against NaN / Infinity
+    s = Math.max(-1, Math.min(1, s));         // guard against clipping
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    offset += 2;
+  }
+  return new Blob([buf], { type: "audio/wav" });
+}
+
+// =========================================================================
+// Waveform rendering
+// =========================================================================
+function drawWaveform(floatAudio) {
+  const canvas = waveformCanvas;
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth || 600;
+  const cssH = canvas.clientHeight || 110;
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const mid = canvas.height / 2;
+  const w = canvas.width;
+  const step = Math.max(1, Math.floor(floatAudio.length / w));
+
+  ctx.strokeStyle = "rgba(242,169,60,0.9)";
+  ctx.lineWidth = Math.max(1, dpr);
+  ctx.beginPath();
+  for (let x = 0; x < w; x++) {
+    const start = x * step;
+    let min = 1, max = -1;
+    for (let i = 0; i < step && start + i < floatAudio.length; i++) {
+      const s = floatAudio[start + i];
+      if (s < min) min = s;
+      if (s > max) max = s;
+    }
+    if (min > max) { min = 0; max = 0; }
+    ctx.moveTo(x + 0.5, mid + min * mid * 0.92);
+    ctx.lineTo(x + 0.5, mid + max * mid * 0.92);
+  }
+  ctx.stroke();
+}
+
+function drawPlayhead(fraction) {
+  const canvas = waveformCanvas;
+  drawWaveform(state.lastAudio);
+  const ctx = canvas.getContext("2d");
+  const x = Math.round(fraction * canvas.width);
+  ctx.strokeStyle = "rgba(86,210,200,0.95)";
+  ctx.lineWidth = Math.max(1, (window.devicePixelRatio || 1));
+  ctx.beginPath();
+  ctx.moveTo(x + 0.5, 0);
+  ctx.lineTo(x + 0.5, canvas.height);
+  ctx.stroke();
+}
+
+// =========================================================================
+// Model loading
+// =========================================================================
+async function refreshCacheBadge() {
+  if (!cachesAvailable()) { setCacheBadge("not-cached", "no persistent cache"); return; }
+  const hit = await isFullyCached();
+  if (hit) setCacheBadge("cached", `cached (~${formatMB(hit.model.byteLength + hit.voices.byteLength)} MB)`);
+  else setCacheBadge("not-cached", "not cached");
+}
+
+async function loadModel() {
+  clearModelError();
+  setStatus("busy", "Loading model…");
+  progressFill.classList.remove("indeterminate");
+
+  try {
+    // --- voices (tiny; always fetch through the cache helper) ---
+    progressLabel.textContent = "Loading voice bank…";
+    progressPct.textContent = "";
+    let voicesBuf = await getCachedBuffer(VOICES_URL);
+    let fromCacheVoices = !!voicesBuf;
+    if (!voicesBuf) {
+      voicesBuf = await fetchWithProgress(VOICES_URL, () => {});
+      await putInCache(VOICES_URL, voicesBuf);
+    }
+    state.voices = await loadVoicesFromNpz(voicesBuf);
+
+    // --- model weights (~24MB; the part users actually want to watch) ---
+    let modelBuf = await getCachedBuffer(MODEL_URL);
+    if (modelBuf) {
+      progressLabel.textContent = `Loaded from cache — ${formatMB(modelBuf.byteLength)} MB / ${formatMB(modelBuf.byteLength)} MB`;
+      progressPct.textContent = "100%";
+      progressFill.style.width = "100%";
+    } else {
+      progressFill.style.width = "0%";
+      modelBuf = await fetchWithProgress(MODEL_URL, ({ loaded, total, speed }) => {
+        if (total > 0) {
+          const pct = Math.min(100, Math.round((loaded / total) * 100));
+          progressFill.classList.remove("indeterminate");
+          progressFill.style.width = pct + "%";
+          progressPct.textContent = pct + "%";
+          progressLabel.textContent = `Downloading model… ${formatMB(loaded)} MB / ${formatMB(total)} MB${speed ? "  ·  " + formatSpeed(speed) : ""}`;
+        } else {
+          progressFill.classList.add("indeterminate");
+          progressPct.textContent = "";
+          progressLabel.textContent = `Downloading model… ${formatMB(loaded)} MB${speed ? "  ·  " + formatSpeed(speed) : ""}`;
+        }
+      });
+      progressFill.classList.remove("indeterminate");
+      progressFill.style.width = "100%";
+      progressPct.textContent = "100%";
+      progressLabel.textContent = `Downloaded ${formatMB(modelBuf.byteLength)} MB`;
+      await putInCache(MODEL_URL, modelBuf);
+    }
+
+    // --- hand the raw weights to the worker and compile the session ---
+    progressLabel.textContent = "Initializing WASM inference session…";
+    if (!state.worker) state.worker = createTtsWorker();
+    // Transfer a copy so the ArrayBuffer we cached above stays intact/usable.
+    const forWorker = modelBuf.slice(0);
+    await callWorker("init", { modelBuffer: forWorker }, [forWorker]);
+
+    state.modelReady = true;
+    setStatus(null, "Model ready");
+    progressLabel.textContent = "Ready.";
+    generateBtn.disabled = state.isGenerating;
+    generateHint.textContent = `${Object.keys(state.voices).length} voices loaded · 24kHz`;
+    await refreshCacheBadge();
+  } catch (err) {
+    console.error(err);
+    state.modelReady = false;
+    generateBtn.disabled = true;
+    generateHint.textContent = "Model unavailable.";
+    showModelError(
+      (err && err.message ? err.message : String(err)) +
+      " — this can happen from a network hiccup, a browser blocking WebAssembly/cross-origin requests, or Hugging Face being briefly unreachable. Use Retry once you've checked your connection."
+    );
+  }
+}
+
+async function clearModelCache() {
+  clearCacheBtn.disabled = true;
+  try {
+    if (cachesAvailable()) await caches.delete(CACHE_NAME);
+  } finally {
+    clearCacheBtn.disabled = false;
+    await refreshCacheBadge();
+  }
+}
+
+// =========================================================================
+// Live phoneme preview (debounced)
+// =========================================================================
+let previewDebounce = null;
+function schedulePhonemePreview() {
+  clearTimeout(previewDebounce);
+  const text = textInput.value.trim();
+  if (!text) {
+    phonemePreview.textContent = "Phoneme preview will appear here as you type…";
+    phonemePreview.classList.add("empty");
+    return;
+  }
+  previewDebounce = setTimeout(async () => {
+    try {
+      const sample = text.length > 200 ? text.slice(0, 200) : text;
+      const { phonemeString } = await phonemizeWithPunctuation(sample);
+      phonemePreview.classList.remove("empty");
+      phonemePreview.innerHTML = "";
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = "IPA →";
+      phonemePreview.appendChild(tag);
+      phonemePreview.appendChild(document.createTextNode(phonemeString + (text.length > 200 ? " …" : "")));
+    } catch {
+      // Phoneme preview is a nicety; silently skip on failure (e.g. before
+      // the WASM phonemizer has finished its first-run initialization).
+    }
+  }, 350);
+}
+
+// =========================================================================
+// Generation
+// =========================================================================
+async function generateSpeech() {
+  if (state.isGenerating || !state.modelReady) return;
+  const text = textInput.value.trim();
+  if (!text) { showGenError("Type something to synthesize first."); return; }
+
+  clearGenError();
+  setGenerating(true);
+  setPipelineStage("text");
+
+  try {
+    const voice = voiceSelect.value;
+    const speed = parseFloat(speedSlider.value);
+    const voiceData = state.voices[voice];
+    if (!voiceData) throw new Error(`Voice "${voice}" isn't present in the loaded voice bank.`);
+    const styleDim = voiceData.shape[1];
+
+    const chunks = chunkText(text, MAX_CHUNK_CHARS);
+    const audioParts = [];
+
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+      generateHint.textContent = chunks.length > 1 ? `Chunk ${i + 1} of ${chunks.length}…` : "Synthesizing…";
+
+      setPipelineStage("phonemize");
+      const { cleaned } = await phonemizeWithPunctuation(chunk);
+      const inputIds = tokenizeToInputIds(cleaned);
+
+      const refId = Math.min(chunk.length, voiceData.shape[0] - 1);
+      const style = voiceData.data.slice(refId * styleDim, (refId + 1) * styleDim);
+
+      setPipelineStage("infer");
+      const result = await callWorker("infer", { inputIds, style, styleDim, speed });
+      if (result.hasNaN) {
+        throw new Error("The model produced invalid (NaN) output for this text. Try shorter or simpler input, or use \u201cDelete cached model\u201d and reload to rule out a corrupted download.");
+      }
+      audioParts.push(new Float32Array(result.audio));
+    }
+
+    setPipelineStage("render");
+    const totalLen = audioParts.reduce((a, b) => a + b.length, 0);
+    const full = new Float32Array(totalLen);
+    let off = 0;
+    for (const p of audioParts) { full.set(p, off); off += p.length; }
+
+    state.lastAudio = full;
+    const wavBlob = encodeWavPCM16(full, SAMPLE_RATE);
+    if (state.lastWavUrl) URL.revokeObjectURL(state.lastWavUrl);
+    state.lastWavUrl = URL.createObjectURL(wavBlob);
+
+    player.src = state.lastWavUrl;
+    downloadBtn.href = state.lastWavUrl;
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    downloadBtn.download = `kitten-tts-${stamp}.wav`;
+
+    const durationSec = full.length / SAMPLE_RATE;
+    outputMeta.textContent = `${durationSec.toFixed(1)}s · ${SAMPLE_RATE / 1000}kHz · 16-bit PCM`;
+    outputPanel.classList.add("show");
+    drawWaveform(full);
+
+    setPipelineStage("done-all");
+    generateHint.textContent = `${Object.keys(state.voices).length} voices loaded · 24kHz`;
+  } catch (err) {
+    console.error(err);
+    showGenError(err && err.message ? err.message : String(err));
+    setPipelineStage(null);
+  } finally {
+    setGenerating(false);
+  }
+}
+
+// =========================================================================
+// Wire up events
+// =========================================================================
+textInput.addEventListener("input", () => { updateCharCount(); schedulePhonemePreview(); });
+tryExampleBtn.addEventListener("click", () => {
+  textInput.value = EXAMPLE_TEXT;
+  updateCharCount();
+  schedulePhonemePreview();
+  textInput.focus();
+});
+
+speedSlider.addEventListener("input", () => {
+  speedReadout.textContent = parseFloat(speedSlider.value).toFixed(2) + "×";
+});
+
+generateBtn.addEventListener("click", generateSpeech);
+retryLoadBtn.addEventListener("click", loadModel);
+clearCacheBtn.addEventListener("click", clearModelCache);
+
+player.addEventListener("timeupdate", () => {
+  if (!state.lastAudio || !player.duration) return;
+  drawPlayhead(player.currentTime / player.duration);
+});
+player.addEventListener("ended", () => { if (state.lastAudio) drawWaveform(state.lastAudio); });
+
+window.addEventListener("resize", () => { if (state.lastAudio) drawWaveform(state.lastAudio); });
+
+// =========================================================================
+// Boot
+// =========================================================================
+(async function init() {
+  updateCharCount();
+  await refreshCacheBadge();
+  await loadModel();
+})();
+</script>
+
+</body>
+</html>
