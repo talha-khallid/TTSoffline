@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Kitten TTS · Studio Dashboard</title>
+<title>Voice AI Studio Dashboard</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -41,7 +41,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* --- Top Right Screen Clock (Clean text only) --- */
+  /* --- Top Right Screen Clock --- */
   .screen-clock {
     position: absolute;
     top: 20px;
@@ -104,16 +104,31 @@
     height: 100%;
   }
 
-  /* 1. Identity Card (Combined & Compact) */
-  .identity-card {
+  /* 1. Interactive Identity Dropdown Card */
+  .identity-card-wrap {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    position: relative;
+    user-select: none;
+    transition: border-color 0.15s ease;
+  }
+  .identity-card-wrap:hover {
+    border-color: #cbd5e1;
+  }
+
+  .identity-card {
     padding: 12px 18px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: background 0.15s ease;
+  }
+  .identity-card:hover {
+    background: #fafbfc;
   }
 
   .brand-group {
@@ -140,7 +155,6 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: 2px;
   }
 
   .brand-meta h1 {
@@ -174,11 +188,11 @@
   }
 
   @media (max-width: 480px) {
-  .stats-badges {
-    display: flex;
-    align-items: end;
-    flex-direction: column;
-  }
+    .stats-badges {
+      display: flex;
+      align-items: end;
+      flex-direction: column;
+    }
   }
 
   .stat-pill {
@@ -192,7 +206,112 @@
     border-radius: 6px;
   }
 
-  /* 2. Model Cache Card */
+  .dropdown-chevron-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: transform 0.2s ease, color 0.15s ease;
+  }
+  .identity-card-wrap.open .dropdown-chevron-wrap {
+    transform: rotate(180deg);
+    color: var(--text);
+  }
+
+  /* Dropdown Menu Drawer */
+  .identity-dropdown-drawer {
+    display: none;
+    padding: 8px 14px 14px;
+    border-top: 1px solid var(--border-light);
+    flex-direction: column;
+    gap: 8px;
+  }
+  .identity-dropdown-drawer.open {
+    display: flex;
+  }
+
+  .model-option-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .model-option-row:hover {
+    border-color: var(--accent);
+    background: #fafbfc;
+  }
+  .model-option-row.active {
+    border-color: var(--accent);
+    background: var(--border-light);
+  }
+
+  .opt-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .opt-icon-mini {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    flex-shrink: 0;
+  }
+  .opt-icon-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .opt-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .opt-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .opt-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .opt-status-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    border: 1px solid var(--border);
+    background: var(--border-light);
+    color: var(--text-muted);
+  }
+  .opt-status-tag.active {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+  }
+  .opt-status-tag.downloaded {
+    color: var(--green);
+    border-color: #a7f3d0;
+    background: #ecfdf5;
+  }
+
+  /* 2. Model Engine Cache Card */
   .model-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -241,6 +360,7 @@
   .dot.ready { background: var(--green); }
   .dot.busy { background: var(--amber); animation: pulse 1.2s infinite ease-in-out; }
   .dot.error { background: var(--red); }
+  .dot.idle { background: var(--text-faint); }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 
   .download-progress {
@@ -284,6 +404,21 @@
     font-size: 11.5px;
     font-weight: 500;
     color: var(--text-muted);
+  }
+
+  .btn-action-primary {
+    background: var(--accent);
+    color: #ffffff;
+    border: 1px solid var(--accent);
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-action-primary:hover {
+    background: var(--accent-hover);
   }
 
   .btn-delete-cache {
@@ -417,7 +552,7 @@
     height: 100%;
   }
 
-  /* --- Streamlined Waveform Audio Player Card --- */
+  /* Waveform Audio Player Card */
   .audio-card {
     display: none;
     padding: 12px 18px;
@@ -581,7 +716,7 @@
     color: var(--text-muted);
   }
 
-  .history-tags { display: flex; align-items: center; gap: 6px; }
+  .history-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   
   .tag {
     background: var(--border-light);
@@ -589,6 +724,13 @@
     padding: 2px 6px;
     border-radius: 4px;
     font-weight: 500;
+  }
+  .tag.model-tag {
+    color: var(--accent);
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+    font-weight: 600;
+    font-family: var(--font-mono);
   }
   .tag.purged { color: var(--amber); background: #fef3c7; border-color: #fde68a; }
 
@@ -610,7 +752,7 @@
   .btn-icon.delete:hover { color: var(--red); background: #fee2e2; }
   .btn-icon svg { width: 14px; height: 14px; }
 
-  /* --- Normal Document Flow Footer --- */
+  /* Footer */
   .screen-footer {
     width: 100%;
     display: flex;
@@ -633,96 +775,69 @@
     text-decoration: underline;
   }
 
-  /* --- Compact Mobile Sizing --- */
   @media (max-width: 860px) {
-    body {
-      padding: 0;
-    }
-    
-    .screen-clock {
-      display: none;
-    }
-
-    .main-content {
-      padding: 16px 14px 0;
-      align-items: flex-start;
-    }
-
-    .container {
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    .left-col, .right-col {
-      gap: 12px;
-    }
-
-    .identity-divider {
-      margin: 0 10px;
-    }
-
-    .card, .identity-card, .model-card, .audio-card {
-      padding: 14px;
-      border-radius: 12px;
-    }
-
-    textarea.input-text {
-      height: 90px;
-      padding: 10px 12px;
-    }
-
-    .history-card {
-      min-height: 380px; 
-    }
-
-    .screen-footer {
-      padding: 20px 16px;
-      font-size: 11.5px;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .footer-right {
-      display: none;
-    }
+    .screen-clock { display: none; }
+    .main-content { padding: 16px 14px 0; align-items: flex-start; }
+    .container { grid-template-columns: 1fr; gap: 12px; }
+    .left-col, .right-col { gap: 12px; }
+    .card, .identity-card-wrap, .model-card, .audio-card { padding: 14px; border-radius: 12px; }
+    textarea.input-text { height: 90px; padding: 10px 12px; }
+    .history-card { min-height: 380px; }
+    .screen-footer { padding: 20px 16px; font-size: 11.5px; justify-content: center; text-align: center; }
+    .footer-right { display: none; }
   }
 </style>
 </head>
 <body>
 
-<!-- Clean Time Clock (Desktop Only) -->
+<!-- Corner Clock -->
 <div id="live-clock" class="screen-clock">--:--:--</div>
 
 <main class="main-content">
   <div class="container">
     <!-- LEFT COLUMN -->
     <div class="left-col">
-      <!-- Top Identity / Summary Card -->
-      <div class="identity-card">
-        <div class="brand-group">
-          <div class="brand-logo-wrap">
-            <img id="brand-logo" class="brand-logo-img" src="data:image/png;base64,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" alt="Kitten TTS Logo" />
+      
+      <!-- 1. Top Identity Card (Dropdown Selector) -->
+      <div class="identity-card-wrap" id="identity-card-wrap">
+        <div class="identity-card" id="identity-card-trigger" title="Click to switch model">
+          <div class="brand-group">
+            <div class="brand-logo-wrap">
+              <img id="brand-logo" class="brand-logo-img" src="" alt="Model Logo" />
+            </div>
+            <div class="brand-meta">
+              <h1 id="brand-model-title">Kitten TTS</h1>
+              <p id="brand-model-sub">15M Parameters · Nano 0.1</p>
+            </div>
           </div>
-          <div class="brand-meta">
-            <h1>Kitten TTS Studio</h1>
-            <p>Local On-Device Voice Synthesis</p>
+          
+          <div class="identity-right">
+            <div class="stats-badges">
+              <span class="stat-pill" id="brand-param-pill">15M</span>
+              <span class="stat-pill">24 kHz</span>
+              <span class="stat-pill">WASM</span>
+            </div>
+            <div class="identity-divider"></div>
+            <div class="dropdown-chevron-wrap">
+              <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </div>
           </div>
         </div>
-        
-        <div class="identity-right">
-          <div class="stats-badges">
-            <span class="stat-pill">24 kHz</span>
-            <span class="stat-pill">WASM</span>
-          </div>
+
+        <!-- Dropdown Menu Drawer -->
+        <div class="identity-dropdown-drawer" id="identity-dropdown-drawer">
+          <!-- Populated dynamically via JS -->
         </div>
       </div>
 
-      <!-- Engine & Model Cache Card -->
+      <!-- 2. Model Engine Cache Card -->
       <div class="model-card">
         <div class="model-header">
           <div>
             <div class="model-info-title">Model Engine</div>
-            <div class="model-info-sub">kitten-tts-nano-0.1 (INT8)</div>
+            <div class="model-info-sub" id="model-engine-sub">kitten-tts-nano-0.1 (INT8)</div>
           </div>
           <div class="status-badge">
             <div class="dot" id="status-dot"></div>
@@ -733,7 +848,7 @@
         <!-- Live Download Monitor -->
         <div class="download-progress" id="download-progress">
           <div class="progress-info">
-            <span id="dp-label">Downloading model (23.8 MB)…</span>
+            <span id="dp-label">Downloading model…</span>
             <span id="dp-pct">0%</span>
           </div>
           <div class="progress-bar-bg">
@@ -742,12 +857,14 @@
         </div>
 
         <div class="model-footer">
-          <span class="model-size-label" id="cache-size-label">Storage: Uncached</span>
-          <button class="btn-delete-cache" id="delete-cache-btn">Delete Cached Model</button>
+          <span class="model-size-label" id="cache-size-label">Storage: Checking…</span>
+          <div id="model-footer-action">
+            <button class="btn-delete-cache" id="delete-cache-btn">Delete Cached Model</button>
+          </div>
         </div>
       </div>
 
-      <!-- Synthesizer Card -->
+      <!-- 3. Synthesizer Card -->
       <div class="card synth-card">
         <div class="card-header" style="margin-bottom: 0;">
           <h2 class="card-title">Synthesize Speech</h2>
@@ -758,21 +875,14 @@
             <span>Input Prompt</span>
             <span class="counter" id="char-counter">0 / 2000</span>
           </div>
-          <textarea class="input-text" id="text-input" maxlength="2000" placeholder="Enter text to synthesize...">Welcome to Kitten TTS. This voice model runs entirely inside your browser using quantized WebAssembly.</textarea>
+          <textarea class="input-text" id="text-input" maxlength="2000" placeholder="Enter text to synthesize...">Welcome to the multi-model voice studio. This pipeline executes neural speech models entirely inside your browser using quantized WebAssembly.</textarea>
         </div>
 
         <div class="controls-row">
           <div class="field">
             <div class="field-label"><span>Voice Persona</span></div>
             <select class="input-select" id="voice-select">
-              <option value="expr-voice-2-m">Voice 2 — Male</option>
-              <option value="expr-voice-2-f">Voice 2 — Female</option>
-              <option value="expr-voice-3-m">Voice 3 — Male</option>
-              <option value="expr-voice-3-f">Voice 3 — Female</option>
-              <option value="expr-voice-4-m">Voice 4 — Male</option>
-              <option value="expr-voice-4-f">Voice 4 — Female</option>
-              <option value="expr-voice-5-m" selected>Voice 5 — Male</option>
-              <option value="expr-voice-5-f">Voice 5 — Female</option>
+              <option value="">Loading voices…</option>
             </select>
           </div>
 
@@ -793,12 +903,11 @@
 
     <!-- RIGHT COLUMN -->
     <div class="right-col">
-      <!-- Minimalist Voice-Message Waveform Player Card -->
+      <!-- Minimalist Voice Waveform Player Card -->
       <div class="card audio-card" id="audio-card">
         <div class="custom-voice-player">
           <button class="voice-play-btn" id="custom-play-btn" aria-label="Play/Pause">
             <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86a1 1 0 0 0-1.5.86z"/></svg>
-            <!-- Symmetrically spaced and centered modern pause bars -->
             <svg id="icon-pause" viewBox="0 0 24 24" style="display:none;">
               <rect x="6.5" y="5" width="3.5" height="14" rx="1.75" />
               <rect x="14" y="5" width="3.5" height="14" rx="1.75" />
@@ -857,6 +966,7 @@ ort.env.wasm.numThreads = 1;
 ort.env.wasm.simd = true;
 
 let session = null;
+let currentEngine = "kitten-tts";
 
 function reply(msg, transfer){
   if (transfer) self.postMessage(msg, transfer);
@@ -868,14 +978,16 @@ self.onmessage = async function (e) {
   const { type, id } = data;
   try {
     if (type === "init") {
+      currentEngine = data.engine || "kitten-tts";
       session = await ort.InferenceSession.create(data.modelBuffer, {
         executionProviders: ["wasm"],
         graphOptimizationLevel: "all",
       });
       reply({ type: "init-done", id });
     } else if (type === "infer") {
-      if (!session) throw new Error("Inference session is not ready.");
+      if (!session) throw new Error("Inference session is not initialized.");
       const { inputIds, style, styleDim, speed } = data;
+      
       const idsBig = new BigInt64Array(inputIds.length);
       for (let i = 0; i < inputIds.length; i++) idsBig[i] = BigInt(inputIds[i]);
 
@@ -883,12 +995,32 @@ self.onmessage = async function (e) {
       const styleTensor = new ort.Tensor("float32", new Float32Array(style), [1, styleDim]);
       const speedTensor = new ort.Tensor("float32", new Float32Array([speed]), [1]);
 
-      const outputs = await session.run({
-        input_ids: inputTensor,
-        style: styleTensor,
-        speed: speedTensor,
-      });
+      const feeds = {};
+      const inputNames = session.inputNames;
+      
+      if (inputNames.includes("input_ids")) {
+        feeds["input_ids"] = inputTensor;
+      } else if (inputNames.includes("tokens")) {
+        feeds["tokens"] = inputTensor;
+      } else if (inputNames.length > 0) {
+        feeds[inputNames[0]] = inputTensor;
+      }
 
+      if (inputNames.includes("style")) {
+        feeds["style"] = styleTensor;
+      } else if (inputNames.includes("ref_s")) {
+        feeds["ref_s"] = styleTensor;
+      } else if (inputNames.length > 1) {
+        feeds[inputNames[1]] = styleTensor;
+      }
+
+      if (inputNames.includes("speed")) {
+        feeds["speed"] = speedTensor;
+      } else if (inputNames.length > 2) {
+        feeds[inputNames[2]] = speedTensor;
+      }
+
+      const outputs = await session.run(feeds);
       const outName = session.outputNames[0];
       const raw = outputs[outName].data;
 
@@ -897,9 +1029,11 @@ self.onmessage = async function (e) {
         if (Number.isNaN(raw[i])) { hasNaN = true; break; }
       }
 
-      const trimmed = raw.length > 24000 ? raw.subarray(0, raw.length - 5000) : raw;
-      const out = new Float32Array(trimmed);
+      const trimmed = currentEngine === "kokoro-tts"
+        ? raw
+        : (raw.length > 24000 ? raw.subarray(0, raw.length - 5000) : raw);
 
+      const out = new Float32Array(trimmed);
       reply({ type: "infer-done", id, audio: out.buffer, hasNaN }, [out.buffer]);
     }
   } catch (err) {
@@ -911,9 +1045,59 @@ self.onmessage = async function (e) {
 <script type="module">
 import { phonemize } from "https://cdn.jsdelivr.net/npm/phonemizer@1.2.1/+esm";
 
-const REPO = "KittenML/kitten-tts-nano-0.1";
-const MODEL_URL = `https://huggingface.co/${REPO}/resolve/main/kitten_tts_nano_v0_1.onnx`;
-const VOICES_URL = `https://huggingface.co/${REPO}/resolve/main/voices.npz`;
+const LOGO_KITTEN = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'><rect width='100' height='100' rx='22' fill='%230f172a'/><path d='M28 68V42L40 54L52 42V68' stroke='%23ffffff' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/><circle cx='70' cy='55' r='7' fill='%2310b981'/></svg>";
+const LOGO_KOKORO = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'><defs><linearGradient id='kg' x1='0' y1='0' x2='100' y2='100'><stop offset='0' stop-color='%239f1239'/><stop offset='1' stop-color='%23881337'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='url(%23kg)'/><path d='M50 79C50 79 23 61 23 41C23 30 31.5 23 41 23C46.5 23 50 26.5 50 26.5C50 26.5 53.5 23 59 23C68.5 23 77 30 77 41C77 61 50 79 50 79Z' fill='%23ffffff'/><circle cx='50' cy='45' r='6' fill='%23f43f5e'/></svg>";
+const LOGO_POCKET = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'><defs><linearGradient id='pg' x1='0' y1='0' x2='100' y2='100'><stop offset='0' stop-color='%230d9488'/><stop offset='1' stop-color='%230f766e'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='url(%23pg)'/><path d='M27 30H73V54C73 68 62.5 78 50 78C37.5 78 27 68 27 54V30Z' fill='%23ffffff'/><path d='M27 43H73' stroke='%230f766e' stroke-width='3.5'/><circle cx='50' cy='60' r='6' fill='%232dd4bf'/></svg>";
+
+const MODELS = {
+  "kitten-tts": {
+    id: "kitten-tts",
+    title: "Kitten TTS",
+    shortName: "Kitten TTS",
+    sub: "15M Parameters · Nano 0.1",
+    paramPill: "15M",
+    repo: "KittenML/kitten-tts-nano-0.1",
+    modelUrl: "https://huggingface.co/KittenML/kitten-tts-nano-0.1/resolve/main/kitten_tts_nano_v0_1.onnx",
+    voicesUrl: "https://huggingface.co/KittenML/kitten-tts-nano-0.1/resolve/main/voices.npz",
+    engineTag: "kitten-tts-nano-0.1 (INT8)",
+    sizeLabel: "~23.8 MB",
+    logoSrc: LOGO_KITTEN,
+    voicesType: "npz"
+  },
+  "kokoro-tts": {
+    id: "kokoro-tts",
+    title: "Kokoro TTS",
+    shortName: "Kokoro TTS",
+    sub: "82M Parameters · 28 Voices",
+    paramPill: "82M",
+    modelUrl: "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main/onnx/model_quantized.onnx",
+    voicesBaseUrl: "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main/voices/",
+    voicesList: [
+      "af_heart","af_alloy","af_aoede","af_bella","af_jessica","af_kore","af_nicole","af_nova","af_river","af_sarah","af_sky",
+      "am_adam","am_echo","am_eric","am_fenrir","am_liam","am_michael","am_onyx","am_puck","am_santa",
+      "bf_alice","bf_emma","bf_isabella","bf_lily",
+      "bm_daniel","bm_fable","bm_george","bm_lewis"
+    ],
+    engineTag: "kokoro-82m-v1.0 (INT8)",
+    sizeLabel: "~107 MB",
+    logoSrc: LOGO_KOKORO,
+    voicesType: "kokoro-bin"
+  },
+  "pocket-tts": {
+    id: "pocket-tts",
+    title: "Pocket TTS",
+    shortName: "Pocket TTS",
+    sub: "80M Parameters · Mini 0.1",
+    paramPill: "80M",
+    modelUrl: "https://huggingface.co/KittenML/kitten-tts-mini-0.1/resolve/main/kitten_tts_mini_v0_1.onnx",
+    voicesUrl: "https://huggingface.co/KittenML/kitten-tts-mini-0.1/resolve/main/voices.npz",
+    engineTag: "kitten-tts-mini-0.1 (WASM)",
+    sizeLabel: "~166.0 MB",
+    logoSrc: LOGO_POCKET,
+    voicesType: "npz"
+  }
+};
+
 const CACHE_NAME = "kitten-tts-nano-0.1-v1";
 const SAMPLE_RATE = 24000;
 const MAX_AUDIO_STORED = 6;
@@ -926,30 +1110,68 @@ const SYMBOLS = [PAD, ...PUNCTUATION_SYMS, ...LETTERS, ...LETTERS_IPA];
 const CHAR_TO_ID = Object.create(null);
 SYMBOLS.forEach((s, i) => { CHAR_TO_ID[s] = i; });
 
+const KOKORO_VOCAB = {
+  ";": 1, ":": 2, ",": 3, ".": 4, "!": 5, "?": 6, "—": 9, "…": 10, "\"": 11, "(": 12, ")": 13,
+  "\u201C": 14, "\u201D": 15, " ": 16, "\u0303": 17, "ʣ": 18, "ʥ": 19, "ʦ": 20, "ʨ": 21, "ᵝ": 22, "\uAB67": 23,
+  "A": 24, "I": 25, "O": 31, "Q": 33, "S": 35, "T": 36, "W": 39, "Y": 41, "ᵊ": 42,
+  "a": 43, "b": 44, "c": 45, "d": 46, "e": 47, "f": 48, "h": 50, "i": 51, "j": 52, "k": 53, "l": 54,
+  "m": 55, "n": 56, "o": 57, "p": 58, "q": 59, "r": 60, "s": 61, "t": 62, "u": 63, "v": 64, "w": 65,
+  "x": 66, "y": 67, "z": 68, "ɑ": 69, "ɐ": 70, "ɒ": 71, "æ": 72, "β": 75, "ɔ": 76, "ɕ": 77, "ç": 78,
+  "ɖ": 80, "ð": 81, "ʤ": 82, "ə": 83, "ɚ": 85, "ɛ": 86, "ɜ": 87, "ɟ": 90, "ɡ": 92, "ɥ": 99, "ɨ": 101,
+  "ɪ": 102, "ʝ": 103, "ɯ": 110, "ɰ": 111, "ŋ": 112, "ɳ": 113, "ɲ": 114, "ɴ": 115, "ø": 116, "ɸ": 118,
+  "θ": 119, "œ": 120, "ɹ": 123, "ɾ": 125, "ɻ": 126, "ʁ": 128, "ɽ": 129, "ʂ": 130, "ʃ": 131, "ʈ": 132,
+  "ʧ": 133, "ʊ": 135, "ʋ": 136, "ʌ": 138, "ɣ": 139, "ɤ": 140, "χ": 142, "ʎ": 143, "ʒ": 147, "ʔ": 148,
+  "ˈ": 156, "ˌ": 157, "ː": 158, "ʰ": 162, "ʲ": 164, "↓": 169, "→": 171, "↗": 172, "↘": 173, "ᵻ": 177
+};
+
+function tokenizeForKokoro(cleanedPhonemeText) {
+  const ids = [0];
+  for (const ch of cleanedPhonemeText) {
+    const id = KOKORO_VOCAB[ch];
+    if (id !== undefined) ids.push(id);
+  }
+  ids.push(0);
+  return ids.slice(0, 510);
+}
+
+function kokoroLangForVoice(voiceKey) {
+  return voiceKey && voiceKey.startsWith("b") ? "en-gb" : "en-us";
+}
+
 const PUNCT_CLUSTER_RE = /(\s*[;:,.!?¡¿—…"«»""()[\]{}]+\s*)+/g;
 const TOKEN_RE = /[\p{L}\p{N}_]+|[^\p{L}\p{N}_\s]/gu;
 
 const el = (id) => document.getElementById(id);
+const identityCardWrap = el("identity-card-wrap");
+const identityCardTrigger = el("identity-card-trigger");
+const identityDropdownDrawer = el("identity-dropdown-drawer");
+const brandLogo = el("brand-logo");
+const brandModelTitle = el("brand-model-title");
+const brandModelSub = el("brand-model-sub");
+const brandParamPill = el("brand-param-pill");
+
+const modelEngineSub = el("model-engine-sub");
 const statusDot = el("status-dot");
 const statusText = el("status-text");
 const cacheSizeLabel = el("cache-size-label");
-const deleteCacheBtn = el("delete-cache-btn");
+const modelFooterAction = el("model-footer-action");
+const dpCard = el("download-progress");
+const dpLabel = el("dp-label");
+const dpPct = el("dp-pct");
+const dpFill = el("dp-fill");
+
 const textInput = el("text-input");
 const charCounter = el("char-counter");
 const voiceSelect = el("voice-select");
 const speedSlider = el("speed-slider");
 const speedVal = el("speed-val");
 const generateBtn = el("generate-btn");
-const dpCard = el("download-progress");
-const dpLabel = el("dp-label");
-const dpPct = el("dp-pct");
-const dpFill = el("dp-fill");
+
 const historyList = el("history-list");
 const historyCount = el("history-count");
 const clearHistoryBtn = el("clear-history-btn");
 const liveClock = el("live-clock");
 
-// Custom Waveform Player Elements
 const audioCard = el("audio-card");
 const player = el("player");
 const playBtn = el("custom-play-btn");
@@ -964,8 +1186,11 @@ let currentPeaks = [];
 let animFrameId = null;
 
 const state = {
+  currentModelId: "kitten-tts",
   modelReady: false,
+  isDownloading: false,
   isGenerating: false,
+  cachedModels: new Set(),
   voices: null,
   worker: null,
   workerReqId: 0,
@@ -973,7 +1198,6 @@ const state = {
   history: []
 };
 
-/* --- Real-Time Corner Clock --- */
 function updateLiveClock() {
   const now = new Date();
   liveClock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -981,7 +1205,6 @@ function updateLiveClock() {
 setInterval(updateLiveClock, 1000);
 updateLiveClock();
 
-/* --- Smooth Waveform Rendering & Player Logic --- */
 function formatTime(seconds) {
   if (isNaN(seconds) || !isFinite(seconds)) return "0:00";
   const m = Math.floor(seconds / 60);
@@ -1062,11 +1285,8 @@ function renderLoop() {
 }
 
 playBtn.addEventListener('click', () => {
-  if (player.paused) {
-    player.play();
-  } else {
-    player.pause();
-  }
+  if (player.paused) player.play();
+  else player.pause();
 });
 
 player.addEventListener('play', () => {
@@ -1126,14 +1346,13 @@ async function loadAudioToPlayer(url, id, rawSamples = null) {
 
   player.src = url;
   customDownloadBtn.href = url;
-  customDownloadBtn.download = `kitten-${id}.wav`;
+  customDownloadBtn.download = `${state.currentModelId}-${id}.wav`;
   audioCard.classList.add("show");
   drawWaveform();
   player.play();
 }
 
-/* --- IndexedDB Storage Helper for History --- */
-const DB_NAME = "kitten_tts_history_db";
+const DB_NAME = "voice_studio_history_db";
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, 1);
@@ -1214,7 +1433,8 @@ function renderHistory() {
       <div class="history-text">${escapeHtml(item.text)}</div>
       <div class="history-meta">
         <div class="history-tags">
-          <span class="tag">${item.voice}</span>
+          <span class="tag model-tag">${escapeHtml(item.modelName || 'TTS')}</span>
+          <span class="tag">${escapeHtml(item.voice)}</span>
           <span class="tag">${item.speed}x</span>
           ${item.audioPurged ? '<span class="tag purged">Audio pruned</span>' : ''}
         </div>
@@ -1223,7 +1443,7 @@ function renderHistory() {
             <button class="btn-icon play-btn" title="Play">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             </button>
-            <a class="btn-icon" href="${audioUrl}" download="kitten-${item.id}.wav" title="Download">
+            <a class="btn-icon" href="${audioUrl}" download="${item.id}.wav" title="Download">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
             </a>
           ` : ''}
@@ -1255,7 +1475,6 @@ function escapeHtml(text) {
   return d.innerHTML;
 }
 
-/* --- NPZ / NPY Reader --- */
 async function unzip(arrayBuffer) {
   const bytes = new Uint8Array(arrayBuffer);
   const view = new DataView(arrayBuffer);
@@ -1322,7 +1541,6 @@ function parseNpy(bytes) {
   let headerLen = majorVersion === 1 ? view.getUint16(8, true) : view.getUint32(8, true);
   let headerStart = majorVersion === 1 ? 10 : 12;
   const headerStr = new TextDecoder().decode(bytes.slice(headerStart, headerStart + headerLen));
-  const descrMatch = headerStr.match(/'descr'\s*:\s*'([^']+)'/);
   const shapeMatch = headerStr.match(/'shape'\s*:\s*\(([^)]*)\)/);
   const shape = shapeMatch ? shapeMatch[1].split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => !Number.isNaN(n)) : [];
   const raw = bytes.slice(headerStart + headerLen);
@@ -1342,7 +1560,70 @@ async function loadVoices(buf) {
   return voices;
 }
 
-/* --- Tokenization & Phonemization --- */
+function updateVoiceDropdown() {
+  const keys = Object.keys(state.voices || {});
+  if (!keys.length) {
+    voiceSelect.innerHTML = '<option value="">No voices available</option>';
+    return;
+  }
+
+  const KOKORO_VOICE_NAMES = {
+    "af_heart": "Heart — US Female (High Quality)",
+    "af_alloy": "Alloy — US Female",
+    "af_aoede": "Aoede — US Female",
+    "af_bella": "Bella — US Female",
+    "af_jessica": "Jessica — US Female",
+    "af_kore": "Kore — US Female",
+    "af_nicole": "Nicole — US Female",
+    "af_nova": "Nova — US Female",
+    "af_river": "River — US Female",
+    "af_sarah": "Sarah — US Female",
+    "af_sky": "Sky — US Female",
+    "am_adam": "Adam — US Male",
+    "am_echo": "Echo — US Male",
+    "am_eric": "Eric — US Male",
+    "am_fenrir": "Fenrir — US Male",
+    "am_liam": "Liam — US Male",
+    "am_michael": "Michael — US Male",
+    "am_onyx": "Onyx — US Male",
+    "am_puck": "Puck — US Male",
+    "am_santa": "Santa — US Male",
+    "bf_alice": "Alice — UK Female",
+    "bf_emma": "Emma — UK Female",
+    "bf_isabella": "Isabella — UK Female",
+    "bf_lily": "Lily — UK Female",
+    "bm_daniel": "Daniel — UK Male",
+    "bm_fable": "Fable — UK Male",
+    "bm_george": "George — UK Male",
+    "bm_lewis": "Lewis — UK Male"
+  };
+
+  voiceSelect.innerHTML = "";
+  keys.sort().forEach((k) => {
+    const opt = document.createElement("option");
+    opt.value = k;
+    let label = k;
+    if (KOKORO_VOICE_NAMES[k]) {
+      label = KOKORO_VOICE_NAMES[k];
+    } else if (k.startsWith("expr-voice-")) {
+      const parts = k.split("-");
+      const num = parts[2];
+      const gender = parts[3] === "m" ? "Male" : "Female";
+      label = `Voice ${num} — ${gender}`;
+    }
+    opt.textContent = label;
+    voiceSelect.appendChild(opt);
+  });
+
+  if (keys.includes("af_heart")) {
+    voiceSelect.value = "af_heart";
+  } else if (keys.includes("expr-voice-5-m")) {
+    voiceSelect.value = "expr-voice-5-m";
+  } else if (keys.length > 0) {
+    voiceSelect.selectedIndex = 0;
+  }
+}
+
 function tokenizeToInputIds(cleanedPhonemeText) {
   const ids = [];
   for (const ch of cleanedPhonemeText) {
@@ -1355,7 +1636,7 @@ function tokenizeToInputIds(cleanedPhonemeText) {
   return ids;
 }
 
-async function phonemizeWithPunctuation(text) {
+async function phonemizeWithPunctuation(text, lang = "en-us") {
   const segments = [];
   let last = 0;
   for (const m of text.matchAll(PUNCT_CLUSTER_RE)) {
@@ -1367,8 +1648,12 @@ async function phonemizeWithPunctuation(text) {
 
   const parts = await Promise.all(segments.map(async (seg) => {
     if (seg.punct || !seg.text.trim()) return seg.text;
-    const phones = await phonemize(seg.text, "en-us");
-    return phones.join(" ");
+    try {
+      const phones = await phonemize(seg.text, lang);
+      return Array.isArray(phones) ? phones.join(" ") : String(phones);
+    } catch {
+      return seg.text;
+    }
   }));
 
   const phonemeString = parts.join("");
@@ -1376,7 +1661,7 @@ async function phonemizeWithPunctuation(text) {
   return { cleaned };
 }
 
-function chunkText(text, maxLen = 400) {
+function chunkText(text) {
   const sentences = text.match(/[^.!?]*[.!?]+|[^.!?]+$/g) || [text];
   const chunks = [];
   for (let s of sentences) {
@@ -1387,9 +1672,8 @@ function chunkText(text, maxLen = 400) {
   return chunks.length ? chunks : [text];
 }
 
-/* --- Cache & Download --- */
 async function getCachedBuffer(url) {
-  if (!("caches" in window)) return null;
+  if (!("caches" in window) || !url) return null;
   try {
     const cache = await caches.open(CACHE_NAME);
     const res = await cache.match(url);
@@ -1398,15 +1682,41 @@ async function getCachedBuffer(url) {
 }
 
 async function putInCache(url, arrayBuffer) {
-  if (!("caches" in window)) return;
+  if (!("caches" in window) || !url) return;
   try {
     const cache = await caches.open(CACHE_NAME);
     await cache.put(url, new Response(arrayBuffer.slice(0)));
   } catch {}
 }
 
+async function checkAllCaches() {
+  if (!("caches" in window)) return;
+  const cache = await caches.open(CACHE_NAME);
+  for (const key of Object.keys(MODELS)) {
+    const cfg = MODELS[key];
+    const hasModel = await cache.match(cfg.modelUrl);
+    if (cfg.voicesType === "kokoro-bin") {
+      const hasPrimaryVoice = await cache.match(`${cfg.voicesBaseUrl}af_heart.bin`);
+      if (hasModel && hasPrimaryVoice) {
+        state.cachedModels.add(key);
+      } else {
+        state.cachedModels.delete(key);
+      }
+    } else {
+      const hasVoices = await cache.match(cfg.voicesUrl);
+      if (hasModel && hasVoices) {
+        state.cachedModels.add(key);
+      } else {
+        state.cachedModels.delete(key);
+      }
+    }
+  }
+  renderDropdownList();
+}
+
 async function fetchWithProgress(url, onProgress) {
   const response = await fetch(url);
+  if (!response.ok) throw new Error(`Network error (${response.status}): ${url}`);
   const total = parseInt(response.headers.get("content-length") || "0", 10);
   const reader = response.body.getReader();
   const chunks = [];
@@ -1426,8 +1736,8 @@ async function fetchWithProgress(url, onProgress) {
   return merged.buffer;
 }
 
-/* --- Worker Dispatch --- */
 function createWorker() {
+  if (state.worker) state.worker.terminate();
   const src = document.getElementById("worker-source").textContent;
   const blob = new Blob([src], { type: "application/javascript" });
   const worker = new Worker(URL.createObjectURL(blob));
@@ -1476,44 +1786,249 @@ function encodeWav(float32Audio, sampleRate) {
   return new Blob([buf], { type: "audio/wav" });
 }
 
-/* --- Engine Lifecycle --- */
-async function loadEngine() {
+function renderDropdownList() {
+  identityDropdownDrawer.innerHTML = "";
+  Object.values(MODELS).forEach((m) => {
+    const isCurrent = m.id === state.currentModelId;
+    const isCached = state.cachedModels.has(m.id);
+
+    const row = document.createElement("div");
+    row.className = `model-option-row ${isCurrent ? 'active' : ''}`;
+    
+    let tagHtml = "";
+    if (isCurrent) {
+      tagHtml = '<span class="opt-status-tag active">Active</span>';
+    } else if (isCached) {
+      tagHtml = '<span class="opt-status-tag downloaded">Downloaded</span>';
+    } else {
+      tagHtml = '<span class="opt-status-tag">Not Cached</span>';
+    }
+
+    row.innerHTML = `
+      <div class="opt-left">
+        <div class="opt-icon-mini"><img src="${m.logoSrc}" alt="" /></div>
+        <div class="opt-meta">
+          <div class="opt-title">${m.title}</div>
+          <div class="opt-desc">${m.sub}</div>
+        </div>
+      </div>
+      ${tagHtml}
+    `;
+
+    row.addEventListener("click", (e) => {
+      e.stopPropagation();
+      selectModel(m.id);
+      toggleDropdown(false);
+    });
+
+    identityDropdownDrawer.appendChild(row);
+  });
+}
+
+function toggleDropdown(force) {
+  const isCurrentlyOpen = identityDropdownDrawer.classList.contains("open");
+  const next = force !== undefined ? force : !isCurrentlyOpen;
+  if (next) {
+    identityDropdownDrawer.classList.add("open");
+    identityCardWrap.classList.add("open");
+  } else {
+    identityDropdownDrawer.classList.remove("open");
+    identityCardWrap.classList.remove("open");
+  }
+}
+
+identityCardTrigger.addEventListener("click", () => toggleDropdown());
+document.addEventListener("click", (e) => {
+  if (!identityCardWrap.contains(e.target)) toggleDropdown(false);
+});
+
+async function selectModel(modelId) {
+  if (state.isDownloading || state.isGenerating) return;
+  state.currentModelId = modelId;
+  const cfg = MODELS[modelId];
+
+  brandModelTitle.textContent = cfg.title;
+  brandModelSub.textContent = cfg.sub;
+  brandParamPill.textContent = cfg.paramPill;
+  brandLogo.src = cfg.logoSrc;
+
+  modelEngineSub.textContent = cfg.engineTag;
+
+  renderDropdownList();
+
+  const isCached = state.cachedModels.has(modelId);
+  if (isCached) {
+    await initLoadedModel();
+  } else {
+    setUncachedUI();
+  }
+}
+
+function setUncachedUI() {
+  state.modelReady = false;
+  generateBtn.disabled = true;
+  statusDot.className = "dot idle";
+  statusText.textContent = "Not Downloaded";
+  cacheSizeLabel.textContent = "Storage: Uncached";
+
+  modelFooterAction.innerHTML = `
+    <button class="btn-action-primary" id="download-model-btn">Download Model (${MODELS[state.currentModelId].sizeLabel})</button>
+  `;
+  el("download-model-btn").addEventListener("click", downloadCurrentModel);
+}
+
+async function initLoadedModel() {
+  state.modelReady = false;
+  generateBtn.disabled = true;
   statusDot.className = "dot busy";
   statusText.textContent = "Loading engine…";
+  cacheSizeLabel.textContent = `Storage: Cached (${MODELS[state.currentModelId].sizeLabel})`;
+
+  modelFooterAction.innerHTML = `
+    <button class="btn-delete-cache" id="delete-cache-btn">Delete Cached Model</button>
+  `;
+  el("delete-cache-btn").addEventListener("click", deleteCurrentCache);
 
   try {
-    let [modelBuf, voicesBuf] = await Promise.all([getCachedBuffer(MODEL_URL), getCachedBuffer(VOICES_URL)]);
-
-    if (!voicesBuf) {
-      voicesBuf = await fetch(VOICES_URL).then(r => r.arrayBuffer());
-      await putInCache(VOICES_URL, voicesBuf);
-    }
-    state.voices = await loadVoices(voicesBuf);
+    const cfg = MODELS[state.currentModelId];
+    const modelBuf = await getCachedBuffer(cfg.modelUrl);
 
     if (!modelBuf) {
-      dpCard.style.display = "block";
-      modelBuf = await fetchWithProgress(MODEL_URL, (pct) => {
-        dpPct.textContent = `${pct}%`;
-        dpFill.style.width = `${pct}%`;
-      });
-      dpCard.style.display = "none";
-      await putInCache(MODEL_URL, modelBuf);
+      setUncachedUI();
+      return;
     }
 
-    if (!state.worker) state.worker = createWorker();
+    if (cfg.voicesType === "kokoro-bin") {
+      const voices = {};
+      for (const vName of cfg.voicesList) {
+        const vUrl = `${cfg.voicesBaseUrl}${vName}.bin`;
+        let vBuf = await getCachedBuffer(vUrl);
+        if (!vBuf) {
+          const r = await fetch(vUrl);
+          if (r.ok) {
+            vBuf = await r.arrayBuffer();
+            await putInCache(vUrl, vBuf);
+          }
+        }
+        if (vBuf) {
+          voices[vName] = { data: new Float32Array(vBuf), shape: [510, 256] };
+        }
+      }
+      state.voices = voices;
+    } else {
+      const voicesBuf = await getCachedBuffer(cfg.voicesUrl);
+      if (!voicesBuf) {
+        setUncachedUI();
+        return;
+      }
+      state.voices = await loadVoices(voicesBuf);
+    }
+
+    updateVoiceDropdown();
+
+    state.worker = createWorker();
     const forWorker = modelBuf.slice(0);
-    await callWorker("init", { modelBuffer: forWorker }, [forWorker]);
+    await callWorker("init", { modelBuffer: forWorker, engine: state.currentModelId }, [forWorker]);
 
     state.modelReady = true;
     statusDot.className = "dot ready";
     statusText.textContent = "Ready";
-    cacheSizeLabel.textContent = "Storage: Cached (~23.8 MB)";
     generateBtn.disabled = false;
   } catch (err) {
-    statusDot.className = "dot error";
-    statusText.textContent = "Offline / Error";
     console.error(err);
+    statusDot.className = "dot error";
+    statusText.textContent = "Load Failed";
   }
+}
+
+async function downloadCurrentModel() {
+  if (state.isDownloading) return;
+  state.isDownloading = true;
+  state.modelReady = false;
+  generateBtn.disabled = true;
+
+  const cfg = MODELS[state.currentModelId];
+
+  statusDot.className = "dot busy";
+  statusText.textContent = "Downloading…";
+  dpCard.style.display = "block";
+  dpLabel.textContent = `Downloading ${cfg.title} (${cfg.sizeLabel})…`;
+  dpPct.textContent = "0%";
+  dpFill.style.width = "0%";
+
+  try {
+    if (cfg.voicesType === "kokoro-bin") {
+      const totalVoices = cfg.voicesList.length;
+      for (let i = 0; i < totalVoices; i++) {
+        const vName = cfg.voicesList[i];
+        const vUrl = `${cfg.voicesBaseUrl}${vName}.bin`;
+        let vBuf = await getCachedBuffer(vUrl);
+        if (!vBuf) {
+          const r = await fetch(vUrl);
+          if (!r.ok) throw new Error(`Failed downloading voice ${vName}`);
+          vBuf = await r.arrayBuffer();
+          await putInCache(vUrl, vBuf);
+        }
+        const pct = Math.round(((i + 1) / totalVoices) * 20);
+        dpPct.textContent = `${pct}%`;
+        dpFill.style.width = `${pct}%`;
+        dpLabel.textContent = `Downloading voices (${i + 1}/${totalVoices})…`;
+      }
+    } else {
+      let voicesBuf = await getCachedBuffer(cfg.voicesUrl);
+      if (!voicesBuf) {
+        voicesBuf = await fetch(cfg.voicesUrl).then((r) => {
+          if (!r.ok) throw new Error("Failed downloading voice package.");
+          return r.arrayBuffer();
+        });
+        await putInCache(cfg.voicesUrl, voicesBuf);
+      }
+      dpPct.textContent = "15%";
+      dpFill.style.width = "15%";
+    }
+
+    dpLabel.textContent = `Downloading model weights (${cfg.sizeLabel})…`;
+    let modelBuf = await fetchWithProgress(cfg.modelUrl, (pct) => {
+      const overall = cfg.voicesType === "kokoro-bin" ? 20 + Math.round(pct * 0.8) : 15 + Math.round(pct * 0.85);
+      dpPct.textContent = `${overall}%`;
+      dpFill.style.width = `${overall}%`;
+    });
+    await putInCache(cfg.modelUrl, modelBuf);
+
+    dpCard.style.display = "none";
+    state.cachedModels.add(state.currentModelId);
+    state.isDownloading = false;
+
+    renderDropdownList();
+    await initLoadedModel();
+  } catch (err) {
+    state.isDownloading = false;
+    dpCard.style.display = "none";
+    statusDot.className = "dot error";
+    statusText.textContent = "Download Error";
+    console.error("Download failed:", err);
+    alert(`Download failed: ${err.message}`);
+    setUncachedUI();
+  }
+}
+
+async function deleteCurrentCache() {
+  if (!("caches" in window)) return;
+  const cfg = MODELS[state.currentModelId];
+  const cache = await caches.open(CACHE_NAME);
+  await cache.delete(cfg.modelUrl);
+
+  if (cfg.voicesType === "kokoro-bin") {
+    for (const vName of cfg.voicesList) {
+      await cache.delete(`${cfg.voicesBaseUrl}${vName}.bin`);
+    }
+  } else if (cfg.voicesUrl) {
+    await cache.delete(cfg.voicesUrl);
+  }
+
+  state.cachedModels.delete(state.currentModelId);
+  renderDropdownList();
+  setUncachedUI();
 }
 
 async function synthesize() {
@@ -1526,18 +2041,24 @@ async function synthesize() {
   statusDot.className = "dot busy";
 
   try {
+    const isKokoro = state.currentModelId === "kokoro-tts";
     const voice = voiceSelect.value;
     const speed = parseFloat(speedSlider.value);
     const voiceData = state.voices[voice];
-    const styleDim = voiceData.shape[1];
-
+    if (!voiceData) throw new Error("Selected voice embedding is missing.");
+    
+    const styleDim = voiceData.shape[1] || 256;
     const chunks = chunkText(text);
     const audioParts = [];
+    const lang = isKokoro ? kokoroLangForVoice(voice) : "en-us";
 
     for (const chunk of chunks) {
-      const { cleaned } = await phonemizeWithPunctuation(chunk);
-      const inputIds = tokenizeToInputIds(cleaned);
-      const refId = Math.min(chunk.length, voiceData.shape[0] - 1);
+      const { cleaned } = await phonemizeWithPunctuation(chunk, lang);
+      const inputIds = isKokoro ? tokenizeForKokoro(cleaned) : tokenizeToInputIds(cleaned);
+
+      if (!inputIds || inputIds.length === 0) continue;
+
+      const refId = Math.min(inputIds.length, voiceData.shape[0] - 1);
       const style = voiceData.data.slice(refId * styleDim, (refId + 1) * styleDim);
 
       const res = await callWorker("infer", { inputIds, style, styleDim, speed });
@@ -1555,10 +2076,13 @@ async function synthesize() {
     const newId = Date.now().toString();
     loadAudioToPlayer(url, newId, full);
 
+    const voiceLabel = voiceSelect.options[voiceSelect.selectedIndex]?.text.split("—")[0].trim() || voice;
+
     saveHistoryItem({
       id: newId,
       text,
-      voice: voiceSelect.options[voiceSelect.selectedIndex].text.split("—")[0].trim(),
+      modelName: MODELS[state.currentModelId].shortName,
+      voice: voiceLabel,
       speed: speed.toFixed(2),
       timestamp: Date.now(),
       audioBlob: wavBlob
@@ -1575,7 +2099,6 @@ async function synthesize() {
   }
 }
 
-// Events
 textInput.addEventListener("input", () => {
   charCounter.textContent = `${textInput.value.length} / 2000`;
 });
@@ -1583,19 +2106,27 @@ speedSlider.addEventListener("input", (e) => {
   speedVal.textContent = `${parseFloat(e.target.value).toFixed(2)}×`;
 });
 generateBtn.addEventListener("click", synthesize);
-
-deleteCacheBtn.addEventListener("click", async () => {
-  if ("caches" in window) {
-    await caches.delete(CACHE_NAME);
-    cacheSizeLabel.textContent = "Storage: Uncached";
-    location.reload();
-  }
-});
 clearHistoryBtn.addEventListener("click", clearAllHistory);
 
-// Boot
-loadHistory();
-loadEngine();
+async function initApp() {
+  brandLogo.src = MODELS["kitten-tts"].logoSrc;
+
+  await loadHistory();
+  await checkAllCaches();
+  renderDropdownList();
+
+  const cfg = MODELS["kitten-tts"];
+  const [m, v] = await Promise.all([getCachedBuffer(cfg.modelUrl), getCachedBuffer(cfg.voicesUrl)]);
+  if (m && v) {
+    state.cachedModels.add("kitten-tts");
+    renderDropdownList();
+    await initLoadedModel();
+  } else {
+    setUncachedUI();
+  }
+}
+
+initApp();
 </script>
 
 </body>
