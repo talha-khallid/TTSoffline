@@ -48,7 +48,7 @@ def main():
         voice_label = selected["name"]
 
     # 3. Load Model Checkpoint
-    print("\nLoading PocketTTS 100M model...")
+    print("\nLoading PocketTTS 100M model onto CPU...")
     tts_model = TTSModel.load_model()
 
     # 4. Generate Speech
