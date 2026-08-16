@@ -1,68 +1,86 @@
+#!/usr/bin/env python3
 import os
-import soundfile as sf
-from pocket_tts import TTSModel
+import sys
+import webbrowser
 
-VOICE_PRESETS = {
-    "1": {"id": "alba", "name": "Alba (Female)"},
-    "2": {"id": "marius", "name": "Marius (Male)"},
-    "3": {"id": "jaime", "name": "Jaime (Male)"},
-    "4": {"id": "jean", "name": "Jean (Male)"},
-}
+import tts_core
+
+KOKORO_VOICES = tts_core.KOKORO_VOICE_PRESETS
+
+
+def run_terminal_mode():
+    print("\n" + "=" * 54)
+    print("      🌸 KOKORO TTS — TERMINAL SYNTHESIS MODE")
+    print("=" * 54)
+
+    # 1. Prompt for Text
+    text = input("\nEnter text to synthesize:\n> ").strip()
+    if not text:
+        print("❌ No text entered. Exiting.")
+        return
+
+    # 2. Select Voice Persona
+    print("\nSelect Kokoro Voice Preset:")
+    for idx, v in enumerate(KOKORO_VOICES, 1):
+        print(f"  [{idx}] {v['name']}")
+
+    while True:
+        v_choice = (
+            input(f"\nPick a voice (1-{len(KOKORO_VOICES)}) [default 1]: ").strip() or "1"
+        )
+        if v_choice.isdigit() and 1 <= int(v_choice) <= len(KOKORO_VOICES):
+            selected_voice = KOKORO_VOICES[int(v_choice) - 1]
+            break
+        print(f"Invalid input. Enter a number between 1 and {len(KOKORO_VOICES)}.")
+
+    # 3. Prompt for Speed Multiplier
+    speed_input = input("\nEnter speech speed multiplier (0.5 to 2.0) [default 1.0]: ").strip()
+    try:
+        speed = float(speed_input) if speed_input else 1.0
+        speed = max(0.5, min(2.0, speed))
+    except ValueError:
+        speed = 1.0
+
+    # 4. Synthesize Speech
+    print(f"\n⚡ Synthesizing with '{selected_voice['name']}' (speed {speed}x)...")
+    try:
+        audio, sample_rate, voice_used = tts_core.synthesize_kokoro(
+            text=text, voice=selected_voice["id"], speed=speed
+        )
+        output_file = "kokoro_output.wav"
+        tts_core.save_audio(audio, output_file, sample_rate)
+
+        print("\n" + "─" * 54)
+        print("✅ SYNTHESIS SUCCESSFUL!")
+        print(f"📁 Output File : {output_file}")
+        print(f"🎙️ Voice Persona: {selected_voice['name']}")
+        print(f"🎧 Sample Rate : {sample_rate} Hz")
+        print(f"🔊 Play Audio  : aplay {output_file}")
+        print("─" * 54 + "\n")
+    except Exception as e:
+        print(f"\n❌ Generation failed: {e}")
 
 
 def main():
-    print("=== PocketTTS 100M Dual-Mode CLI (Preset & Zero-Shot Cloning) ===")
+    print("\n" + "=" * 54)
+    print("             🌸 KOKORO TTS STUDIO")
+    print("=" * 54)
+    print("How would you like to run Kokoro TTS?")
+    print("  [1] Terminal Mode (CLI Generation)")
+    print("  [2] Web UI Mode   (Browser Interface)")
 
-    # 1. Prompt for Text
-    text = input("What do you want the model to say?\n> ").strip()
-    if not text:
-        print("No text entered. Exiting.")
-        return
+    mode = input("\nSelect mode (1 or 2) [default 1]: ").strip() or "1"
 
-    # 2. Select Voice Preset or Clone
-    print("\nVoice Generation Mode:")
-    for key, v in VOICE_PRESETS.items():
-        print(f"[{key}] Preset: {v['name']}")
-    clone_key = str(len(VOICE_PRESETS) + 1)
-    print(f"[{clone_key}] Zero-shot Voice Clone (.wav reference file)")
+    if mode == "2":
+        port = 8001
+        url = f"http://localhost:{port}?model=kokoro"
+        print(f"\n🚀 Launching Web UI for Kokoro TTS at {url} ...")
+        webbrowser.open(url)
+        import uvicorn
 
-    choice = input(f"\nPick an option (1-{clone_key}) [default 1]: ").strip() or "1"
-
-    voice_prompt = "alba"
-    voice_label = "Alba (Female)"
-
-    if choice == clone_key:
-        while True:
-            ref_path = input("\nEnter path to reference .wav clip (or Enter for 'alba'): ").strip()
-            if not ref_path:
-                print("No file provided. Falling back to preset 'alba'.")
-                break
-            if os.path.isfile(ref_path):
-                voice_prompt = ref_path
-                voice_label = f"Cloned from '{ref_path}'"
-                break
-            print(f"File '{ref_path}' not found. Please enter a valid path.")
+        uvicorn.run("app:app", host="0.0.0.0", port=port, reload=False)
     else:
-        selected = VOICE_PRESETS.get(choice, VOICE_PRESETS["1"])
-        voice_prompt = selected["id"]
-        voice_label = selected["name"]
-
-    # 3. Load Model Checkpoint
-    print("\nLoading PocketTTS 100M model...")
-    tts_model = TTSModel.load_model()
-
-    # 4. Generate Speech
-    print(f"Synthesizing with {voice_label}...")
-    voice_state = tts_model.get_state_for_audio_prompt(voice_prompt)
-    audio_tensor = tts_model.generate_audio(voice_state, text)
-
-    # 5. Save Output
-    output_file = "pocket_output.wav"
-    audio_data = audio_tensor.cpu().numpy() if hasattr(audio_tensor, "cpu") else audio_tensor
-    sf.write(output_file, audio_data, tts_model.sample_rate)
-
-    print(f"\nSuccess! Audio generated and saved to '{output_file}'.")
-    print(f"Listen with: aplay {output_file}")
+        run_terminal_mode()
 
 
 if __name__ == "__main__":

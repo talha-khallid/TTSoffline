@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unified TTS Studio — Local On-Device AI Voice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #0b0f19;
+    --card-bg: rgba(22, 30, 49, 0.75);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-border-hover: rgba(99, 102, 241, 0.4);
+    --accent: #6366f1;
+    --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    --accent-glow: rgba(99, 102, 241, 0.25);
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+  }
+
+  .header-nav {
+    max-width: 1200px;
+    margin: 0 auto 30px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .brand-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 14px var(--accent-glow);
+  }
+
+  .brand-title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .brand-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.6);
+    padding: 5px;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+  }
+
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tab-btn:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .tab-btn.active {
+    background: var(--accent-gradient);
+    color: #ffffff;
+    box-shadow: 0 4px 12px var(--accent-glow);
+  }
+
+  .main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
+  }
+
+  @media (max-width: 960px) {
+    .main-container { grid-template-columns: 1fr; }
+    .header-nav { flex-direction: column; gap: 16px; align-items: stretch; }
+    .nav-tabs { justify-content: center; }
+  }
+
+  .panel {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .field-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  textarea.prompt-input {
+    width: 100%;
+    height: 120px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  textarea.prompt-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  select.select-input {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  select.select-input option {
+    background: #0f172a;
+    color: #ffffff;
+  }
+
+  /* Zero-Shot Voice Cloning Dropzone */
+  .clone-zone {
+    border: 2px dashed var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    text-align: center;
+    background: rgba(15, 23, 42, 0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: none;
+  }
+
+  .clone-zone.visible { display: block; }
+
+  .clone-zone:hover {
+    border-color: var(--accent);
+    background: rgba(99, 102, 241, 0.05);
+  }
+
+  .clone-icon { font-size: 28px; margin-bottom: 8px; }
+  .clone-text { font-size: 13px; font-weight: 600; color: var(--text); }
+  .clone-sub { font-size: 11.5px; color: var(--text-dim); margin-top: 4px; }
+  input[type="file"] { display: none; }
+
+  .btn-synth {
+    background: var(--accent-gradient);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 16px var(--accent-glow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-synth:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  }
+
+  .btn-synth:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Audio Result Card */
+  .player-card {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  audio {
+    width: 100%;
+    height: 40px;
+    border-radius: 8px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--green);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .history-item {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .history-text {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<header class="header-nav">
+  <div class="brand">
+    <div class="brand-icon">🎙️</div>
+    <div>
+      <div class="brand-title">TTS Studio</div>
+      <div class="brand-sub">Local Multi-Model Voice Synthesis</div>
+    </div>
+  </div>
+
+  <nav class="nav-tabs">
+    <button class="tab-btn active" id="tab-kitten" onclick="switchModel('kitten')">🐱 Kitten TTS</button>
+    <button class="tab-btn" id="tab-kokoro" onclick="switchModel('kokoro')">🌸 Kokoro TTS</button>
+    <button class="tab-btn" id="tab-pocket" onclick="switchModel('pocket')">🎙️ Pocket TTS</button>
+  </nav>
+</header>
+
+<main class="main-container">
+  <!-- Left Panel: Controls & Input -->
+  <section class="panel">
+    <div class="section-title">
+      <span id="model-badge" class="badge">Model: KittenTTS Nano v1</span>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">
+        <span>Prompt Text</span>
+        <span id="char-count" style="font-family: var(--font-mono)">0 / 1000</span>
+      </div>
+      <textarea id="prompt-text" class="prompt-input" placeholder="Type text here to synthesize speech..." maxlength="1000">Welcome to TTS Studio. Experience clean, offline speech synthesis powered by AI.</textarea>
+    </div>
+
+    <!-- Dynamic Options -->
+    <div class="controls-grid">
+      <!-- Variant Selection (Kitten only) -->
+      <div class="field-group" id="group-variant">
+        <div class="field-label">Model Architecture</div>
+        <select id="select-variant" class="select-input" onchange="updateVoices()">
+          <option value="nano_v1">Kitten Nano v1 (15M / 24MB)</option>
+          <option value="nano_v2">Kitten Nano v2 (15M / 24MB)</option>
+          <option value="mini_v1">Kitten Mini (80M / 166MB)</option>
+        </select>
+      </div>
+
+      <!-- Voice Selection -->
+      <div class="field-group" id="group-voice">
+        <div class="field-label">Voice Persona</div>
+        <select id="select-voice" class="select-input"></select>
+      </div>
+
+      <!-- Speed Control (Kokoro) -->
+      <div class="field-group" id="group-speed" style="display: none;">
+        <div class="field-label">Speed Multiplier (<span id="speed-val">1.0x</span>)</div>
+        <input type="range" id="speed-range" min="0.5" max="2.0" step="0.1" value="1.0" class="select-input" oninput="document.getElementById('speed-val').innerText = this.value + 'x'">
+      </div>
+
+      <!-- Pocket TTS Mode (Preset vs Clone) -->
+      <div class="field-group" id="group-pocket-mode" style="display: none;">
+        <div class="field-label">Voice Mode</div>
+        <select id="select-pocket-mode" class="select-input" onchange="togglePocketMode()">
+          <option value="preset">Preset Voice</option>
+          <option value="clone">Zero-Shot Voice Clone (.wav)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Voice Clone Drag & Drop Zone -->
+    <div class="clone-zone" id="clone-zone" onclick="document.getElementById('clone-file').click()">
+      <div class="clone-icon">📁</div>
+      <div class="clone-text" id="clone-file-name">Click or drag reference .wav file here</div>
+      <div class="clone-sub">Max 10s audio clip for voice cloning reference</div>
+      <input type="file" id="clone-file" accept="audio/wav,audio/x-wav" onchange="handleFileSelect(event)">
+    </div>
+
+    <button id="btn-generate" class="btn-synth" onclick="generateAudio()">
+      <span>✨ Generate Speech</span>
+    </button>
+  </section>
+
+  <!-- Right Panel: Audio Output & History -->
+  <section class="panel">
+    <div class="section-title">🔊 Audio Player</div>
+
+    <div class="player-card">
+      <div id="status-text" style="font-size: 13px; color: var(--text-muted)">Ready for generation</div>
+      <audio id="audio-player" controls style="display: none;"></audio>
+      <a id="btn-download" download="tts_output.wav" style="display: none; font-size: 12.5px; color: var(--accent); text-decoration: none; font-weight: 600;">⬇️ Download WAV Audio</a>
+    </div>
+
+    <div class="section-title" style="margin-top: 10px;">📜 Generation History</div>
+    <div id="history-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto;">
+      <div style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 20px;">No history yet.</div>
+    </div>
+  </section>
+</main>
+
+<script>
+let currentModel = 'kitten';
+let selectedFile = null;
+
+const voicesData = {
+  kitten: ["expr-voice-1-m", "expr-voice-1-f", "expr-voice-2-m", "expr-voice-2-f", "expr-voice-3-m", "expr-voice-3-f", "expr-voice-4-m", "expr-voice-4-f", "expr-voice-5-m", "expr-voice-5-f"],
+  kokoro: [
+    {id: "af_heart", name: "American Female — Heart"},
+    {id: "af_bella", name: "American Female — Bella"},
+    {id: "af_sarah", name: "American Female — Sarah"},
+    {id: "af_sky", name: "American Female — Sky"},
+    {id: "am_adam", name: "American Male — Adam"},
+    {id: "am_echo", name: "American Male — Echo"},
+    {id: "am_eric", name: "American Male — Eric"},
+    {id: "am_michael", name: "American Male — Michael"},
+    {id: "bf_alice", name: "British Female — Alice"},
+    {id: "bm_daniel", name: "British Male — Daniel"}
+  ],
+  pocket: [
+    {id: "alba", name: "Alba (Female)"},
+    {id: "marius", name: "Marius (Male)"},
+    {id: "jean", name: "Jean (Male)"},
+    {id: "javert", name: "Javert (Male)"},
+    {id: "cosette", name: "Cosette (Female)"},
+    {id: "anna", name: "Anna (Female)"},
+    {id: "vera", name: "Vera (Female)"},
+    {id: "fantine", name: "Fantine (Female)"},
+    {id: "charles", name: "Charles (Male)"},
+    {id: "paul", name: "Paul (Male)"},
+    {id: "eponine", name: "Eponine (Female)"},
+    {id: "george", name: "George (Male)"},
+    {id: "mary", name: "Mary (Female)"},
+    {id: "jane", name: "Jane (Female)"},
+    {id: "michael", name: "Michael (Male)"},
+    {id: "eve", name: "Eve (Female)"},
+    {id: "giovanni", name: "Giovanni (Male)"},
+    {id: "lola", name: "Lola (Female)"}
+  ]
+};
+
+function switchModel(model) {
+  currentModel = model;
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('tab-' + model).classList.add('active');
+
+  const badge = document.getElementById('model-badge');
+  const variantGrp = document.getElementById('group-variant');
+  const speedGrp = document.getElementById('group-speed');
+  const pocketModeGrp = document.getElementById('group-pocket-mode');
+  const cloneZone = document.getElementById('clone-zone');
+
+  variantGrp.style.display = (model === 'kitten') ? 'flex' : 'none';
+  speedGrp.style.display = (model === 'kokoro') ? 'flex' : 'none';
+  pocketModeGrp.style.display = (model === 'pocket') ? 'flex' : 'none';
+  cloneZone.style.display = 'none';
+
+  if (model === 'kitten') badge.innerText = 'Model: KittenTTS';
+  else if (model === 'kokoro') badge.innerText = 'Model: Kokoro ONNX';
+  else if (model === 'pocket') badge.innerText = 'Model: PocketTTS 100M';
+
+  updateVoices();
+}
+
+function updateVoices() {
+  const voiceSelect = document.getElementById('select-voice');
+  voiceSelect.innerHTML = '';
+
+  const list = voicesData[currentModel] || [];
+  list.forEach(v => {
+    const opt = document.createElement('option');
+    if (typeof v === 'string') {
+      opt.value = v;
+      opt.innerText = v;
+    } else {
+      opt.value = v.id;
+      opt.innerText = v.name;
+    }
+    voiceSelect.appendChild(opt);
+  });
+}
+
+function togglePocketMode() {
+  const mode = document.getElementById('select-pocket-mode').value;
+  const voiceGrp = document.getElementById('group-voice');
+  const cloneZone = document.getElementById('clone-zone');
+
+  if (mode === 'clone') {
+    voiceGrp.style.display = 'none';
+    cloneZone.style.display = 'block';
+  } else {
+    voiceGrp.style.display = 'flex';
+    cloneZone.style.display = 'none';
+  }
+}
+
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (file) {
+    selectedFile = file;
+    document.getElementById('clone-file-name').innerText = 'Selected: ' + file.name;
+  }
+}
+
+// Check URL query parameters for default model selection (e.g. ?model=kokoro)
+const urlParams = new URLSearchParams(window.location.search);
+const paramModel = urlParams.get('model');
+if (paramModel && ['kitten', 'kokoro', 'pocket'].includes(paramModel)) {
+  switchModel(paramModel);
+} else {
+  switchModel('kitten');
+}
+
+async function generateAudio() {
+  const text = document.getElementById('prompt-text').value.trim();
+  if (!text) { alert('Please enter text to synthesize.'); return; }
+
+  const btn = document.getElementById('btn-generate');
+  const status = document.getElementById('status-text');
+  const player = document.getElementById('audio-player');
+  const download = document.getElementById('btn-download');
+
+  btn.disabled = true;
+  status.innerText = 'Synthesizing audio with ' + currentModel + '...';
+
+  try {
+    let response;
+
+    if (currentModel === 'pocket' && document.getElementById('select-pocket-mode').value === 'clone') {
+      if (!selectedFile) {
+        alert('Please select a reference .wav file for voice cloning.');
+        btn.disabled = false;
+        status.innerText = 'Voice clone file required.';
+        return;
+      }
+      const formData = new FormData();
+      formData.append('text', text);
+      formData.append('ref_audio', selectedFile);
+      response = await fetch('/api/clone', { method: 'POST', body: formData });
+    } else {
+      const payload = {
+        model: currentModel,
+        text: text,
+        submodel: document.getElementById('select-variant').value,
+        voice: document.getElementById('select-voice').value,
+        speed: parseFloat(document.getElementById('speed-range').value)
+      };
+      response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      status.innerText = 'Synthesis complete! (Voice: ' + data.voice + ')';
+      player.src = data.audio_url;
+      player.style.display = 'block';
+      player.play();
+      download.href = data.audio_url;
+      download.style.display = 'inline-block';
+
+      // Append to history
+      addHistory(text, currentModel, data.voice, data.audio_url);
+    } else {
+      status.innerText = 'Error: ' + (data.error || 'Generation failed.');
+    }
+  } catch (err) {
+    status.innerText = 'Server error: ' + err.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function addHistory(text, model, voice, url) {
+  const container = document.getElementById('history-list');
+  if (container.children[0] && container.children[0].innerText.includes('No history')) {
+    container.innerHTML = '';
+  }
+  const item = document.createElement('div');
+  item.className = 'history-item';
+  item.innerHTML = `
+    <div class="history-text">"${text}"</div>
+    <div style="display:flex; justify-size: space-between; font-size:11px; color:var(--text-muted);">
+      <span>${model.toUpperCase()} · ${voice}</span>
+      <a href="${url}" download style="color:var(--accent); text-decoration:none; font-weight:600;">Download</a>
+    </div>
+  `;
+  container.prepend(item);
+}
+</script>
+</body>
+</html>
