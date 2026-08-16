@@ -4,16 +4,19 @@ import uuid
 from typing import Optional
 from fastapi import FastAPI, File, Form, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_DIR = os.path.join(BASE_DIR, "src")
+OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
+
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
 
 import tts_core
 
 app = FastAPI(title="TTS Studio Server")
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_DIR = os.path.join(BASE_DIR, "static_output")
-os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 class GenerateRequest(BaseModel):
@@ -24,14 +27,39 @@ class GenerateRequest(BaseModel):
     speed: Optional[float] = 1.0
 
 
+class ModelStatusRequest(BaseModel):
+    model: str
+    submodel: Optional[str] = "nano_v1"
+
+
 @app.get("/", response_class=HTMLResponse)
 def serve_ui():
     """Serves the standalone Web UI dashboard."""
-    ui_path = os.path.join(BASE_DIR, "web_ui.html")
+    ui_path = os.path.join(SRC_DIR, "web_ui.html")
     if not os.path.exists(ui_path):
-        raise HTTPException(status_code=404, detail="web_ui.html file not found.")
+        raise HTTPException(status_code=404, detail="web_ui.html file not found in src/.")
     with open(ui_path, "r", encoding="utf-8") as f:
         return f.read()
+
+
+@app.get("/api/model_status")
+def api_model_status(model: str, submodel: Optional[str] = "nano_v1"):
+    """API endpoint to check local model cache status."""
+    try:
+        res = tts_core.check_model_status(model, submodel)
+        return {"status": "success", "data": res}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "error": str(e)})
+
+
+@app.post("/api/download_model")
+def api_download_model(req: ModelStatusRequest):
+    """API endpoint to download model weights from UI."""
+    try:
+        res = tts_core.download_model_files(req.model, req.submodel)
+        return {"status": "success", "data": res}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "error": str(e)})
 
 
 @app.post("/api/generate")
@@ -97,7 +125,7 @@ async def api_clone(text: str = Form(...), ref_audio: UploadFile = File(...)):
 
 @app.get("/output/{filename}")
 def serve_audio(filename: str):
-    """Serves generated output audio files."""
+    """Serves generated output audio files from outputs/ folder."""
     file_path = os.path.join(OUTPUT_DIR, filename)
     if os.path.exists(file_path):
         return FileResponse(file_path, media_type="audio/wav")

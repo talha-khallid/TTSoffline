@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 import os
 import sys
-import webbrowser
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_DIR = os.path.join(BASE_DIR, "src")
+OUTPUTS_DIR = os.path.join(BASE_DIR, "outputs")
+
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
 
 import tts_core
 
 KITTEN_MODELS = tts_core.KITTEN_MODELS
 
 
-def run_terminal_mode():
+def main():
     print("\n" + "=" * 54)
     print("      🐱 KITTEN TTS — TERMINAL SYNTHESIS MODE")
     print("=" * 54)
@@ -65,39 +71,17 @@ def run_terminal_mode():
         audio, sample_rate, _ = tts_core.synthesize_kitten(
             text=text, submodel=selected_model_key, voice=selected_voice
         )
-        output_file = "kitten_output.wav"
+        output_file = os.path.join(OUTPUTS_DIR, "kitten_output.wav")
         tts_core.save_audio(audio, output_file, sample_rate)
 
         print("\n" + "─" * 54)
         print("✅ SYNTHESIS SUCCESSFUL!")
         print(f"📁 Output File : {output_file}")
         print(f"🎧 Sample Rate : {sample_rate} Hz")
-        print(f"🔊 Play Audio  : aplay {output_file}")
+        print(f"🔊 Play Audio  : aplay \"{output_file}\"")
         print("─" * 54 + "\n")
     except Exception as e:
         print(f"\n❌ Generation failed: {e}")
-
-
-def main():
-    print("\n" + "=" * 54)
-    print("             🐱 KITTEN TTS STUDIO")
-    print("=" * 54)
-    print("How would you like to run Kitten TTS?")
-    print("  [1] Terminal Mode (CLI Generation)")
-    print("  [2] Web UI Mode   (Browser Interface)")
-
-    mode = input("\nSelect mode (1 or 2) [default 1]: ").strip() or "1"
-
-    if mode == "2":
-        port = 8000
-        url = f"http://localhost:{port}?model=kitten"
-        print(f"\n🚀 Launching Web UI for Kitten TTS at {url} ...")
-        webbrowser.open(url)
-        import uvicorn
-
-        uvicorn.run("app:app", host="0.0.0.0", port=port, reload=False)
-    else:
-        run_terminal_mode()
 
 
 if __name__ == "__main__":

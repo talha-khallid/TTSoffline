@@ -4,23 +4,34 @@ import numpy as np
 import soundfile as sf
 
 # ---------------------------------------------------------------------------
+# Project Paths
+# ---------------------------------------------------------------------------
+SRC_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(SRC_DIR)
+MODELS_DIR = os.path.join(ROOT_DIR, "models")
+OUTPUTS_DIR = os.path.join(ROOT_DIR, "outputs")
+
+os.makedirs(MODELS_DIR, exist_ok=True)
+os.makedirs(OUTPUTS_DIR, exist_ok=True)
+
+# ---------------------------------------------------------------------------
 # Kitten TTS Configuration
 # ---------------------------------------------------------------------------
 KITTEN_MODELS = {
     "nano_v1": {
-        "name": "KittenTTS Nano v1 (15M Params / 24MB - Ultra Fast)",
+        "name": "KittenTTS Nano v1 (15M Params / 24MB)",
         "repo_id": "KittenML/kitten-tts-nano-0.1",
         "model_file": "kitten_tts_nano_v0_1.onnx",
         "voices_file": "voices.npz",
     },
     "nano_v2": {
-        "name": "KittenTTS Nano v2 (15M Params / 24MB - Enhanced)",
+        "name": "KittenTTS Nano v2 (15M Params / 24MB)",
         "repo_id": "KittenML/kitten-tts-nano-0.2",
         "model_file": "kitten_tts_nano_v0_2.onnx",
         "voices_file": "voices.npz",
     },
     "mini_v1": {
-        "name": "KittenTTS Mini (80M Params / 166MB - High Quality)",
+        "name": "KittenTTS Mini (80M Params / 166MB)",
         "repo_id": "KittenML/kitten-tts-mini-0.1",
         "model_file": "kitten_tts_mini_v0_1.onnx",
         "voices_file": "voices.npz",
@@ -31,7 +42,7 @@ KITTEN_MODELS = {
 # Kokoro TTS Configuration
 # ---------------------------------------------------------------------------
 KOKORO_VOICE_PRESETS = [
-    {"id": "af_heart", "name": "American Female — Heart (Popular)", "category": "American Female"},
+    {"id": "af_heart", "name": "American Female — Heart", "category": "American Female"},
     {"id": "af_bella", "name": "American Female — Bella", "category": "American Female"},
     {"id": "af_sarah", "name": "American Female — Sarah", "category": "American Female"},
     {"id": "af_sky", "name": "American Female — Sky", "category": "American Female"},
@@ -96,19 +107,23 @@ def get_kitten_model(submodel_key="nano_v1"):
 
 
 def get_kokoro_model():
-    """Loads Kokoro ONNX model instance."""
+    """Loads Kokoro ONNX model instance from models/ directory."""
     if "kokoro" in _model_cache:
         return _model_cache["kokoro"]
 
     from kokoro_onnx import Kokoro
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    model_file = os.path.join(base_dir, "kokoro-v1.0.onnx")
-    voices_file = os.path.join(base_dir, "voices-v1.0.bin")
+    model_file = os.path.join(MODELS_DIR, "kokoro-v1.0.onnx")
+    voices_file = os.path.join(MODELS_DIR, "voices-v1.0.bin")
+
+    if not os.path.isfile(model_file):
+        model_file = os.path.join(ROOT_DIR, "kokoro-v1.0.onnx")
+    if not os.path.isfile(voices_file):
+        voices_file = os.path.join(ROOT_DIR, "voices-v1.0.bin")
 
     if not os.path.isfile(model_file) or not os.path.isfile(voices_file):
         raise FileNotFoundError(
-            f"Kokoro model files missing in {base_dir}. Expected kokoro-v1.0.onnx and voices-v1.0.bin."
+            f"Kokoro model files missing in {MODELS_DIR}. Expected kokoro-v1.0.onnx and voices-v1.0.bin."
         )
 
     kokoro = Kokoro(model_file, voices_file)
@@ -126,6 +141,67 @@ def get_pocket_model():
     tts_model = TTSModel.load_model()
     _model_cache["pocket"] = tts_model
     return tts_model
+
+
+def check_model_status(model_key, submodel_key="nano_v1"):
+    """Checks if a model is downloaded locally on disk."""
+    if model_key == "kokoro":
+        m_file = os.path.join(MODELS_DIR, "kokoro-v1.0.onnx")
+        v_file = os.path.join(MODELS_DIR, "voices-v1.0.bin")
+        exists = os.path.isfile(m_file) and os.path.isfile(v_file)
+        if exists:
+            size_mb = round((os.path.getsize(m_file) + os.path.getsize(v_file)) / (1024 * 1024), 1)
+            return {"downloaded": True, "size_label": f"Model Files: Downloaded ({size_mb} MB)"}
+        return {"downloaded": False, "size_label": "Model Files: Missing (350 MB)"}
+
+    elif model_key == "kitten":
+        config = KITTEN_MODELS.get(submodel_key, KITTEN_MODELS["nano_v1"])
+        from huggingface_hub import try_to_load_from_cache
+
+        m_cached = try_to_load_from_cache(repo_id=config["repo_id"], filename=config["model_file"])
+        if m_cached is not None and isinstance(m_cached, str) and os.path.exists(m_cached):
+            size_mb = round(os.path.getsize(m_cached) / (1024 * 1024), 1)
+            return {"downloaded": True, "size_label": f"Model Files: Downloaded ({size_mb} MB)"}
+        return {"downloaded": False, "size_label": f"Model Files: Missing ({config['name'].split()[-1]})"}
+
+    elif model_key == "pocket":
+        is_cached = "pocket" in _model_cache
+        if not is_cached:
+            try:
+                from huggingface_hub import try_to_load_from_cache
+                c = try_to_load_from_cache(repo_id="kyutai/pocket-tts", filename="model.safetensors")
+                if c and os.path.exists(c):
+                    is_cached = True
+            except Exception:
+                pass
+
+        if is_cached:
+            return {"downloaded": True, "size_label": "Model Files: Downloaded (100M)"}
+        return {"downloaded": False, "size_label": "Model Files: Missing (100M)"}
+
+    return {"downloaded": True, "size_label": "Model Files: Downloaded"}
+
+
+def download_model_files(model_key, submodel_key="nano_v1"):
+    """Downloads model files locally if missing."""
+    if model_key == "kitten":
+        get_kitten_model(submodel_key)
+    elif model_key == "kokoro":
+        m_file = os.path.join(MODELS_DIR, "kokoro-v1.0.onnx")
+        v_file = os.path.join(MODELS_DIR, "voices-v1.0.bin")
+        if not os.path.isfile(m_file) or not os.path.isfile(v_file):
+            from huggingface_hub import hf_hub_download
+            import shutil
+
+            downloaded_m = hf_hub_download(repo_id="hexgrad/Kokoro-82M", filename="kokoro-v1.0.onnx")
+            downloaded_v = hf_hub_download(repo_id="hexgrad/Kokoro-82M", filename="voices-v1.0.bin")
+            shutil.copy(downloaded_m, m_file)
+            shutil.copy(downloaded_v, v_file)
+        get_kokoro_model()
+    elif model_key == "pocket":
+        get_pocket_model()
+
+    return check_model_status(model_key, submodel_key)
 
 
 def synthesize_kitten(text, submodel="nano_v1", voice=None, speed=1.0):
@@ -174,5 +250,7 @@ def synthesize_pocket(text, voice_or_ref="alba"):
 
 def save_audio(audio_data, output_path, sample_rate):
     """Saves numpy audio array to a WAV file."""
+    if not os.path.isabs(output_path):
+        output_path = os.path.join(OUTPUTS_DIR, output_path)
     sf.write(output_path, audio_data, sample_rate)
     return output_path

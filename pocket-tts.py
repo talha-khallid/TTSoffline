@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 import os
 import sys
-import webbrowser
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_DIR = os.path.join(BASE_DIR, "src")
+OUTPUTS_DIR = os.path.join(BASE_DIR, "outputs")
+
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
 
 import tts_core
 
 POCKET_VOICES = tts_core.POCKET_VOICE_PRESETS
 
 
-def run_terminal_mode():
+def main():
     print("\n" + "=" * 54)
     print("   🎙️ POCKET TTS 100M — TERMINAL SYNTHESIS & CLONING MODE")
     print("=" * 54)
@@ -56,7 +62,7 @@ def run_terminal_mode():
         audio, sample_rate, used_voice = tts_core.synthesize_pocket(
             text=text, voice_or_ref=voice_target
         )
-        output_file = "pocket_output.wav"
+        output_file = os.path.join(OUTPUTS_DIR, "pocket_output.wav")
         tts_core.save_audio(audio, output_file, sample_rate)
 
         print("\n" + "─" * 54)
@@ -64,32 +70,10 @@ def run_terminal_mode():
         print(f"📁 Output File : {output_file}")
         print(f"🎙️ Voice Mode   : {voice_label}")
         print(f"🎧 Sample Rate : {sample_rate} Hz")
-        print(f"🔊 Play Audio  : aplay {output_file}")
+        print(f"🔊 Play Audio  : aplay \"{output_file}\"")
         print("─" * 54 + "\n")
     except Exception as e:
         print(f"\n❌ Generation failed: {e}")
-
-
-def main():
-    print("\n" + "=" * 54)
-    print("             🎙️ POCKET TTS STUDIO")
-    print("=" * 54)
-    print("How would you like to run Pocket TTS?")
-    print("  [1] Terminal Mode (CLI Generation & Voice Cloning)")
-    print("  [2] Web UI Mode   (Browser Studio with Voice Cloning)")
-
-    mode = input("\nSelect mode (1 or 2) [default 1]: ").strip() or "1"
-
-    if mode == "2":
-        port = 8002
-        url = f"http://localhost:{port}?model=pocket"
-        print(f"\n🚀 Launching Web UI for Pocket TTS at {url} ...")
-        webbrowser.open(url)
-        import uvicorn
-
-        uvicorn.run("app:app", host="0.0.0.0", port=port, reload=False)
-    else:
-        run_terminal_mode()
 
 
 if __name__ == "__main__":

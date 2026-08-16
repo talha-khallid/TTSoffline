@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TTS Studio · Multi-Model Dashboard</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --border-light: #f1f5f9;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --text-faint: #94a3b8;
+    --accent: #0f172a;
+    --accent-hover: #1e293b;
+    --indigo: #6366f1;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --radius: 16px;
+    --radius-sm: 8px;
+    --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* --- Top Right Screen Clock --- */
+  .screen-clock {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    z-index: 100;
+  }
+
+  /* --- Main Layout Wrapper --- */
+  .main-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 50px 32px 40px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 1160px;
+    display: grid;
+    grid-template-columns: 1.08fr 0.92fr;
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  @media (max-width: 960px) {
+    .container { grid-template-columns: 1fr; }
+    .screen-clock { display: none; }
+  }
+
+  /* --- Common Cards --- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  .left-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+  }
+
+  /* --- 1. Top Identity / Header Card --- */
+  .identity-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  }
+
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-logo-wrap {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: #0f172a;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+  }
+
+  .brand-meta h1 {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text);
+  }
+
+  .brand-meta p {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .stat-pill {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    background: var(--border-light);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  /* --- 2. Model Selector & Cache Card --- */
+  .model-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  }
+
+  .model-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .model-info-title {
+    font-size: 13.5px;
+    font-weight: 700;
+  }
+
+  .model-info-sub {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    margin-top: 1px;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--border-light);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--amber);
+  }
+  .dot.ready { background: var(--green); }
+  .dot.busy { background: var(--amber); animation: pulse 1.2s infinite ease-in-out; }
+  .dot.error { background: var(--red); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .model-card-select {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  .model-card-select:focus { border-color: var(--accent); }
+
+  .download-progress {
+    margin-top: 12px;
+    display: none;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+
+  .progress-bar-bg {
+    height: 5px;
+    background: var(--border-light);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.15s ease;
+  }
+
+  .model-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .model-size-label {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .btn-download-model {
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-download-model:hover { background: var(--accent-hover); }
+
+  /* --- 3. Synthesizer Card --- */
+  .synth-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .field-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .counter {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+  }
+
+  textarea.input-text {
+    width: 100%;
+    height: 110px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  textarea.input-text:focus { border-color: var(--text); }
+
+  .controls-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  select.input-select {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+  }
+  select.input-select:focus { border-color: var(--text); }
+
+  /* Zero-Shot Voice Cloning Dropzone */
+  .clone-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    text-align: center;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: none;
+    margin-bottom: 14px;
+  }
+  .clone-zone:hover { border-color: var(--accent); background: #ffffff; }
+
+  .clone-text { font-size: 12.5px; font-weight: 600; color: var(--text); }
+  .clone-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  input[type="file"] { display: none; }
+
+  .slider-container {
+    display: flex;
+    align-items: center;
+    height: 38px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 5px;
+    background: var(--border);
+    border-radius: 100px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  .btn-generate {
+    width: 100%;
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-generate:hover:not(:disabled) { background: var(--accent-hover); }
+  .btn-generate:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* --- Right Column Layout --- */
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+  }
+
+  /* --- Audio Waveform Player Card --- */
+  .audio-card {
+    display: none;
+    padding: 12px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    animation: fadeIn 0.25s ease-out;
+  }
+  .audio-card.show { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .custom-voice-player {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+  }
+
+  .voice-play-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.1s ease, color 0.15s ease;
+  }
+  .voice-play-btn:hover { color: var(--accent-hover); }
+  .voice-play-btn:active { transform: scale(0.92); }
+  .voice-play-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+  .waveform-container {
+    flex: 1;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+  }
+
+  #waveform-canvas {
+    width: 100%;
+    height: 36px;
+    display: block;
+  }
+
+  .voice-player-end {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .voice-duration {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-muted);
+    min-width: 32px;
+    text-align: right;
+  }
+
+  .voice-download {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: color 0.15s ease, background 0.15s ease;
+    text-decoration: none;
+  }
+  .voice-download:hover { color: var(--text); background: var(--border-light); }
+  .voice-download svg { width: 15px; height: 15px; }
+
+  /* --- History Card --- */
+  .history-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .history-header-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pill-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--border-light);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 100px;
+  }
+
+  .btn-clear-history {
+    background: transparent;
+    border: none;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.15s ease;
+  }
+  .btn-clear-history:hover { color: var(--red); }
+
+  .history-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 4px;
+  }
+
+  .history-empty {
+    text-align: center;
+    margin: auto;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+
+  .history-item {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .history-text {
+    font-size: 12.5px;
+    color: var(--text);
+    line-height: 1.45;
+    word-break: break-word;
+  }
+
+  .history-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .history-tags { display: flex; align-items: center; gap: 6px; }
+  
+  .tag {
+    background: var(--border-light);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .history-actions { display: flex; align-items: center; gap: 4px; }
+
+  .btn-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }
+  .btn-icon:hover { color: var(--text); background: var(--border-light); }
+  .btn-icon.delete:hover { color: var(--red); background: #fee2e2; }
+  .btn-icon svg { width: 14px; height: 14px; }
+
+  /* Footer */
+  .screen-footer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  .screen-footer a {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.15s ease;
+  }
+  .screen-footer a:hover { color: var(--text-muted); text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div id="live-clock" class="screen-clock">--:--:--</div>
+
+<main class="main-content">
+  <div class="container">
+    
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+      
+      <!-- 1. Top Identity Header Card -->
+      <div class="identity-card">
+        <div class="brand-group">
+          <div class="brand-logo-wrap">TTS</div>
+          <div class="brand-meta">
+            <h1>TTS Studio</h1>
+            <p>Unified Multi-Model Voice Engine</p>
+          </div>
+        </div>
+
+        <div class="identity-right">
+          <div class="stats-badges">
+            <span class="stat-pill">24 kHz</span>
+            <span class="stat-pill">ONNX / PyTorch</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Model Selector & Cache Management Card -->
+      <div class="model-card">
+        <div class="model-header">
+          <div>
+            <div class="model-info-title">Model Engine</div>
+            <div class="model-info-sub" id="model-sub-info">KittenTTS Nano v1 (INT8)</div>
+          </div>
+          <div class="status-badge">
+            <div class="dot ready" id="status-dot"></div>
+            <span id="status-text">Ready</span>
+          </div>
+        </div>
+
+        <!-- MODEL SELECTOR DROPDOWN -->
+        <select id="model-select" class="model-card-select" onchange="switchModel(this.value)">
+          <option value="kitten">Kitten TTS — Nano & Mini Architectures</option>
+          <option value="kokoro">Kokoro TTS — 82M Precision ONNX Engine</option>
+          <option value="pocket">Pocket TTS — 100M Zero-Shot & Presets</option>
+        </select>
+
+        <!-- Live Download Monitor -->
+        <div class="download-progress" id="download-progress">
+          <div class="progress-info">
+            <span id="dp-label">Downloading model files…</span>
+            <span id="dp-pct">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="dp-fill"></div>
+          </div>
+        </div>
+
+        <div class="model-footer">
+          <span class="model-size-label" id="cache-size-label">Model Files: Checking...</span>
+          <button class="btn-download-model" id="download-model-btn" onclick="downloadModelFromUI()" style="display: none;">Download Model</button>
+        </div>
+      </div>
+
+      <!-- 3. Synthesizer Card -->
+      <div class="card synth-card">
+        <div class="card-header" style="margin-bottom: 0;">
+          <h2 class="card-title">Synthesize Speech</h2>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span>Input Prompt</span>
+            <span class="counter" id="char-counter">0 / 2000</span>
+          </div>
+          <textarea class="input-text" id="text-input" maxlength="2000" placeholder="Type text here to synthesize speech...">Welcome to TTS Studio. Select voice models from the dropdown card above to synthesize speech.</textarea>
+        </div>
+
+        <!-- Controls Row -->
+        <div class="controls-row">
+          <!-- Kitten Submodel -->
+          <div class="field" id="field-submodel">
+            <div class="field-label"><span>Architecture</span></div>
+            <select class="input-select" id="submodel-select" onchange="checkModelStatus()">
+              <option value="nano_v1">Nano v1 (15M / 24MB)</option>
+              <option value="nano_v2">Nano v2 (15M / 24MB)</option>
+              <option value="mini_v1">Mini v1 (80M / 166MB)</option>
+            </select>
+          </div>
+
+          <!-- Pocket Mode Switcher -->
+          <div class="field" id="field-pocket-mode" style="display: none;">
+            <div class="field-label"><span>Voice Mode</span></div>
+            <select class="input-select" id="pocket-mode-select" onchange="togglePocketMode()">
+              <option value="preset">Preset Voice Catalog</option>
+              <option value="clone">Zero-Shot Voice Clone (.wav)</option>
+            </select>
+          </div>
+
+          <!-- Voice Persona Dropdown -->
+          <div class="field" id="field-voice">
+            <div class="field-label"><span>Voice Persona</span></div>
+            <select class="input-select" id="voice-select"></select>
+          </div>
+
+          <!-- Speed Slider (Kokoro) -->
+          <div class="field" id="field-speed" style="display: none;">
+            <div class="field-label">
+              <span>Speed</span>
+              <span class="counter" id="speed-val">1.00×</span>
+            </div>
+            <div class="slider-container">
+              <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.05" value="1.0" oninput="document.getElementById('speed-val').innerText = parseFloat(this.value).toFixed(2) + '×'" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Zero-Shot Voice Cloning Dropzone -->
+        <div class="clone-zone" id="clone-zone" onclick="document.getElementById('clone-file').click()">
+          <div class="clone-text" id="clone-file-name">Click or drag reference .wav file here</div>
+          <div class="clone-sub">Max 10s WAV audio clip for reference voice cloning</div>
+          <input type="file" id="clone-file" accept="audio/wav,audio/x-wav" onchange="handleFileSelect(event)">
+        </div>
+
+        <button class="btn-generate" id="generate-btn" onclick="generateAudio()">Generate Speech</button>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+      <!-- Waveform Audio Player Card -->
+      <div class="card audio-card" id="audio-card">
+        <div class="custom-voice-player">
+          <button class="voice-play-btn" id="custom-play-btn" onclick="togglePlay()" aria-label="Play/Pause">
+            <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86a1 1 0 0 0-1.5.86z"/></svg>
+            <svg id="icon-pause" viewBox="0 0 24 24" style="display:none;">
+              <rect x="6.5" y="5" width="3.5" height="14" rx="1.75" />
+              <rect x="14" y="5" width="3.5" height="14" rx="1.75" />
+            </svg>
+          </button>
+          
+          <div class="waveform-container" id="waveform-wrap">
+            <canvas id="waveform-canvas"></canvas>
+          </div>
+
+          <div class="voice-player-end">
+            <span class="voice-duration" id="audio-time">0:00</span>
+            <a class="voice-download" id="custom-download-btn" download="output.wav" title="Download Audio">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+            </a>
+          </div>
+          <audio id="player" style="display: none;"></audio>
+        </div>
+      </div>
+
+      <!-- History Card -->
+      <div class="card history-card">
+        <div class="card-header">
+          <h2 class="card-title">Generation History</h2>
+          <div class="history-header-info">
+            <span class="pill-count" id="history-count">0 items</span>
+            <button class="btn-clear-history" id="clear-history-btn" onclick="clearHistory()">Clear All</button>
+          </div>
+        </div>
+
+        <div class="history-list" id="history-list">
+          <div class="history-empty">No generations yet. Create your first audio on the left.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="screen-footer">
+  <div class="footer-left">
+    For web development and custom business automations &nbsp;<a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">contact on Instagram</a>
+  </div>
+  <div class="footer-right">
+    <span>Follow on Instagram &nbsp;</span><a href="https://www.instagram.com/talhaxcodes/" target="_blank" rel="noopener noreferrer">@talhaxcodes</a>
+  </div>
+</footer>
+
+<script>
+// Live clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('live-clock').innerText = now.toTimeString().split(' ')[0];
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Text character counter
+const textInput = document.getElementById('text-input');
+const charCounter = document.getElementById('char-counter');
+textInput.addEventListener('input', () => {
+  charCounter.innerText = `${textInput.value.length} / 2000`;
+});
+
+let currentModel = 'kitten';
+let selectedFile = null;
+let historyItems = [];
+let audioBufferData = null;
+
+const voicesData = {
+  kitten: ["expr-voice-1-m", "expr-voice-1-f", "expr-voice-2-m", "expr-voice-2-f", "expr-voice-3-m", "expr-voice-3-f", "expr-voice-4-m", "expr-voice-4-f", "expr-voice-5-m", "expr-voice-5-f"],
+  kokoro: [
+    {id: "af_heart", name: "American Female — Heart"},
+    {id: "af_bella", name: "American Female — Bella"},
+    {id: "af_sarah", name: "American Female — Sarah"},
+    {id: "af_sky", name: "American Female — Sky"},
+    {id: "am_adam", name: "American Male — Adam"},
+    {id: "am_echo", name: "American Male — Echo"},
+    {id: "am_eric", name: "American Male — Eric"},
+    {id: "am_michael", name: "American Male — Michael"},
+    {id: "bf_alice", name: "British Female — Alice"},
+    {id: "bm_daniel", name: "British Male — Daniel"}
+  ],
+  pocket: [
+    {id: "alba", name: "Alba (Female)"},
+    {id: "marius", name: "Marius (Male)"},
+    {id: "jean", name: "Jean (Male)"},
+    {id: "javert", name: "Javert (Male)"},
+    {id: "cosette", name: "Cosette (Female)"},
+    {id: "anna", name: "Anna (Female)"},
+    {id: "vera", name: "Vera (Female)"},
+    {id: "fantine", name: "Fantine (Female)"},
+    {id: "charles", name: "Charles (Male)"},
+    {id: "paul", name: "Paul (Male)"},
+    {id: "eponine", name: "Eponine (Female)"},
+    {id: "george", name: "George (Male)"},
+    {id: "mary", name: "Mary (Female)"},
+    {id: "jane", name: "Jane (Female)"},
+    {id: "michael", name: "Michael (Male)"},
+    {id: "eve", name: "Eve (Female)"},
+    {id: "giovanni", name: "Giovanni (Male)"},
+    {id: "lola", name: "Lola (Female)"}
+  ]
+};
+
+function switchModel(model) {
+  currentModel = model;
+  document.getElementById('model-select').value = model;
+
+  const submodelField = document.getElementById('field-submodel');
+  const speedField = document.getElementById('field-speed');
+  const pocketModeField = document.getElementById('field-pocket-mode');
+  const cloneZone = document.getElementById('clone-zone');
+  const subInfo = document.getElementById('model-sub-info');
+
+  submodelField.style.display = (model === 'kitten') ? 'flex' : 'none';
+  speedField.style.display = (model === 'kokoro') ? 'flex' : 'none';
+  pocketModeField.style.display = (model === 'pocket') ? 'flex' : 'none';
+  cloneZone.style.display = 'none';
+
+  if (model === 'kitten') {
+    subInfo.innerText = 'KittenTTS Nano v1 (INT8 ONNX)';
+  } else if (model === 'kokoro') {
+    subInfo.innerText = 'Kokoro-82M Precision ONNX Engine';
+  } else if (model === 'pocket') {
+    subInfo.innerText = 'PocketTTS 100M Zero-Shot & Presets';
+  }
+
+  updateVoices();
+  checkModelStatus();
+}
+
+function updateVoices() {
+  const voiceSelect = document.getElementById('voice-select');
+  voiceSelect.innerHTML = '';
+
+  const list = voicesData[currentModel] || [];
+  list.forEach(v => {
+    const opt = document.createElement('option');
+    if (typeof v === 'string') {
+      opt.value = v;
+      opt.innerText = v;
+    } else {
+      opt.value = v.id;
+      opt.innerText = v.name;
+    }
+    voiceSelect.appendChild(opt);
+  });
+}
+
+function togglePocketMode() {
+  const mode = document.getElementById('pocket-mode-select').value;
+  const voiceField = document.getElementById('field-voice');
+  const cloneZone = document.getElementById('clone-zone');
+
+  if (mode === 'clone') {
+    voiceField.style.display = 'none';
+    cloneZone.style.display = 'block';
+  } else {
+    voiceField.style.display = 'flex';
+    cloneZone.style.display = 'none';
+  }
+}
+
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (file) {
+    selectedFile = file;
+    document.getElementById('clone-file-name').innerText = 'Selected: ' + file.name;
+  }
+}
+
+// Model Status & Download Logic
+async function checkModelStatus() {
+  const submodel = document.getElementById('submodel-select').value;
+  const statusDot = document.getElementById('status-dot');
+  const statusText = document.getElementById('status-text');
+  const sizeLabel = document.getElementById('cache-size-label');
+  const downloadBtn = document.getElementById('download-model-btn');
+  const genBtn = document.getElementById('generate-btn');
+
+  try {
+    const res = await fetch(`/api/model_status?model=${currentModel}&submodel=${submodel}`);
+    const json = await res.json();
+
+    if (json.status === 'success' && json.data.downloaded) {
+      statusDot.className = 'dot ready';
+      statusText.innerText = 'Ready';
+      sizeLabel.innerText = json.data.size_label;
+      downloadBtn.style.display = 'none';
+      genBtn.disabled = false;
+    } else {
+      statusDot.className = 'dot';
+      statusText.innerText = 'Not Downloaded';
+      sizeLabel.innerText = json.data ? json.data.size_label : 'Model Files: Missing';
+      downloadBtn.style.display = 'inline-block';
+      genBtn.disabled = false;
+    }
+  } catch (err) {
+    statusDot.className = 'dot ready';
+    statusText.innerText = 'Ready';
+    sizeLabel.innerText = 'Model Files: Downloaded';
+    downloadBtn.style.display = 'none';
+    genBtn.disabled = false;
+  }
+}
+
+async function downloadModelFromUI() {
+  const submodel = document.getElementById('submodel-select').value;
+  const statusDot = document.getElementById('status-dot');
+  const statusText = document.getElementById('status-text');
+  const progressDiv = document.getElementById('download-progress');
+  const dpFill = document.getElementById('dp-fill');
+  const dpPct = document.getElementById('dp-pct');
+  const downloadBtn = document.getElementById('download-model-btn');
+
+  statusDot.className = 'dot busy';
+  statusText.innerText = 'Downloading...';
+  progressDiv.style.display = 'block';
+  downloadBtn.disabled = true;
+
+  dpFill.style.width = '30%';
+  dpPct.innerText = '30%';
+
+  try {
+    const res = await fetch('/api/download_model', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: currentModel, submodel: submodel })
+    });
+    const json = await res.json();
+
+    dpFill.style.width = '100%';
+    dpPct.innerText = '100%';
+
+    setTimeout(() => {
+      progressDiv.style.display = 'none';
+      checkModelStatus();
+    }, 500);
+  } catch (err) {
+    statusDot.className = 'dot error';
+    statusText.innerText = 'Error';
+    alert('Failed to download model: ' + err.message);
+  } finally {
+    downloadBtn.disabled = false;
+  }
+}
+
+// Waveform Player Logic (Exact parity with index.html)
+const player = document.getElementById('player');
+const playBtn = document.getElementById('custom-play-btn');
+const iconPlay = document.getElementById('icon-play');
+const iconPause = document.getElementById('icon-pause');
+const canvas = document.getElementById('waveform-canvas');
+const ctx = canvas.getContext('2d');
+const audioTime = document.getElementById('audio-time');
+const customDownloadBtn = document.getElementById('custom-download-btn');
+const waveformWrap = document.getElementById('waveform-wrap');
+
+function drawWaveform(progress = 0) {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  const width = canvas.width;
+  const height = canvas.height;
+  if (width === 0) return;
+
+  const barCount = 45;
+  const barWidth = 3;
+  const gap = (width - barCount * barWidth) / (barCount - 1);
+
+  ctx.clearRect(0, 0, width, height);
+
+  for (let i = 0; i < barCount; i++) {
+    const x = i * (barWidth + gap);
+    const barHeight = Math.sin(i * 0.4) * 10 + Math.cos(i * 0.8) * 8 + 18;
+    const y = (height - barHeight) / 2;
+
+    if (i / barCount <= progress) {
+      ctx.fillStyle = '#0f172a';
+    } else {
+      ctx.fillStyle = '#cbd5e1';
+    }
+    ctx.fillRect(x, y, barWidth, barHeight);
+  }
+}
+
+drawWaveform(0);
+
+waveformWrap.addEventListener('click', (e) => {
+  if (!player.duration) return;
+  const rect = waveformWrap.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const pct = Math.max(0, Math.min(1, clickX / rect.width));
+  player.currentTime = pct * player.duration;
+  drawWaveform(pct);
+});
+
+player.addEventListener('timeupdate', () => {
+  if (player.duration) {
+    const pct = player.currentTime / player.duration;
+    drawWaveform(pct);
+    const mins = Math.floor(player.currentTime / 60);
+    const secs = Math.floor(player.currentTime % 60).toString().padStart(2, '0');
+    audioTime.innerText = `${mins}:${secs}`;
+  }
+});
+
+player.addEventListener('ended', () => {
+  iconPlay.style.display = 'block';
+  iconPause.style.display = 'none';
+  drawWaveform(0);
+});
+
+function togglePlay() {
+  if (!player.src) return;
+  if (player.paused) {
+    player.play();
+    iconPlay.style.display = 'none';
+    iconPause.style.display = 'block';
+  } else {
+    player.pause();
+    iconPlay.style.display = 'block';
+    iconPause.style.display = 'none';
+  }
+}
+
+// Generate Speech
+async function generateAudio() {
+  const text = textInput.value.trim();
+  if (!text) { alert('Please enter text to synthesize.'); return; }
+
+  const btn = document.getElementById('generate-btn');
+  const statusDot = document.getElementById('status-dot');
+  const statusText = document.getElementById('status-text');
+
+  btn.disabled = true;
+  statusDot.className = 'dot busy';
+  statusText.innerText = 'Synthesizing...';
+
+  try {
+    let response;
+
+    if (currentModel === 'pocket' && document.getElementById('pocket-mode-select').value === 'clone') {
+      if (!selectedFile) {
+        alert('Please select a reference .wav file for voice cloning.');
+        btn.disabled = false;
+        statusDot.className = 'dot error';
+        statusText.innerText = 'Ref required';
+        return;
+      }
+      const formData = new FormData();
+      formData.append('text', text);
+      formData.append('ref_audio', selectedFile);
+      response = await fetch('/api/clone', { method: 'POST', body: formData });
+    } else {
+      const payload = {
+        model: currentModel,
+        text: text,
+        submodel: document.getElementById('submodel-select').value,
+        voice: document.getElementById('voice-select').value,
+        speed: parseFloat(document.getElementById('speed-slider').value)
+      };
+      response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      statusDot.className = 'dot ready';
+      statusText.innerText = 'Ready';
+
+      player.src = data.audio_url;
+      customDownloadBtn.href = data.audio_url;
+      document.getElementById('audio-card').classList.add('show');
+      
+      togglePlay();
+      addHistory(text, currentModel, data.voice, data.audio_url);
+    } else {
+      statusDot.className = 'dot error';
+      statusText.innerText = 'Error';
+      alert('Generation Error: ' + (data.error || 'Failed to synthesize speech.'));
+    }
+  } catch (err) {
+    statusDot.className = 'dot error';
+    statusText.innerText = 'Error';
+    alert('Server Connection Error: ' + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function addHistory(text, model, voice, url) {
+  historyItems.unshift({ text, model: model.toUpperCase(), voice, url, id: Date.now() });
+  renderHistory();
+}
+
+function deleteHistoryItem(id) {
+  historyItems = historyItems.filter(item => item.id !== id);
+  renderHistory();
+}
+
+function clearHistory() {
+  historyItems = [];
+  renderHistory();
+}
+
+function playHistoryItem(url) {
+  player.src = url;
+  customDownloadBtn.href = url;
+  document.getElementById('audio-card').classList.add('show');
+  togglePlay();
+}
+
+function renderHistory() {
+  const container = document.getElementById('history-list');
+  const countPill = document.getElementById('history-count');
+
+  countPill.innerText = `${historyItems.length} items`;
+
+  if (historyItems.length === 0) {
+    container.innerHTML = '<div class="history-empty">No generations yet. Create your first audio on the left.</div>';
+    return;
+  }
+
+  container.innerHTML = historyItems.map(item => `
+    <div class="history-item">
+      <div class="history-text">"${item.text}"</div>
+      <div class="history-meta">
+        <div class="history-tags">
+          <span class="tag">${item.model}</span>
+          <span class="tag">${item.voice}</span>
+        </div>
+        <div class="history-actions">
+          <button class="btn-icon" onclick="playHistoryItem('${item.url}')" title="Play">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86a1 1 0 0 0-1.5.86z"/></svg>
+          </button>
+          <a class="btn-icon" href="${item.url}" download title="Download">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+          </a>
+          <button class="btn-icon delete" onclick="deleteHistoryItem(${item.id})" title="Delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Initial initialization
+const urlParams = new URLSearchParams(window.location.search);
+const paramModel = urlParams.get('model');
+if (paramModel && ['kitten', 'kokoro', 'pocket'].includes(paramModel)) {
+  switchModel(paramModel);
+} else {
+  switchModel('kitten');
+}
+</script>
+
+</body>
+</html>
